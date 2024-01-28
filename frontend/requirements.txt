@@ -1,0 +1,4 @@
+streamlit
+pydantic
+streamlit-extras
+streamlit-chat

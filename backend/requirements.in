@@ -1,0 +1,10 @@
+wheel
+requests
+fastapi
+SQLAlchemy
+passlib
+authlib
+python-dotenv
+Faker
+langchain
+langchain-openai
