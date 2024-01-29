@@ -1,5 +1,12 @@
+from datetime import datetime
+
 from . import BaseModel, BaseORMModel
 from pydantic import constr, Field
+from faker import Faker
+
+
+def random_name():
+    return Faker().name()
 
 
 class AccountLOGIN(BaseModel):
@@ -12,7 +19,7 @@ class AccountFULL(BaseORMModel):
     name: str
     username: str
     email: str
-    time_created: str
+    time_created: datetime
 
 
 class AccountGET(BaseORMModel):
@@ -23,6 +30,7 @@ class AccountGET(BaseORMModel):
 
 
 class AccountPOST(BaseORMModel):
+    name: str = Field(min_length=5, max_length=128, default_factory=random_name)
     username: str = Field(min_length=8, max_length=128, pattern=r"^[a-zA-Z0-9_!@#$%^&*+-/]+$")
     password: str = Field(min_length=8, max_length=128, pattern=r"^[a-zA-Z0-9_!@#$%^&*+-/]+$")
     email: str = Field(max_length=128, pattern=r"^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,4})+$")

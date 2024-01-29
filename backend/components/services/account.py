@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from sqlalchemy import select, or_
 from pydantic import BaseModel, ConfigDict, Field
 from configurations import Security
-from components.data import POSTGRES_SESSION_FACTORY
+from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import postgres as PostgresSchemas
 from components.repositories.account import AccountRepository
@@ -72,8 +72,8 @@ class AccountService:
             if payload["type"] != ACCESS_TOKEN_TYPE:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
             with POSTGRES_SESSION_FACTORY.begin() as session:
-                repo = AccountRepository(session=session)
-                account = repo.get(identifier=payload["id"])
+                repository = AccountRepository(session=session)
+                account = repository.get(identifier=payload["id"])
                 if account is None:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
                 return account
@@ -86,12 +86,51 @@ class AccountService:
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
+    @classmethod
+    def deactivate_token(cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME)):
+        try:
+            payload = _decode_token(token)
+            if payload["type"] != REFRESH_TOKEN_TYPE:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            REDIS_SESSION.setex(f"Logout:{payload['jti']}", Security.JWT_REFRESH_TOKEN_EXPIRE_MINUTES * 60, "1")
+        except (jwt.ExpiredSignatureError, jwt.JWTError):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+    @classmethod
+    def renew_token(cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME)):
+        try:
+            payload = _decode_token(token)
+            if payload["type"] != REFRESH_TOKEN_TYPE:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            if REDIS_SESSION.get(f"Logout:{payload['jti']}") is not None:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+            with POSTGRES_SESSION_FACTORY.begin() as session:
+                repository = AccountRepository(session=session)
+                account = repository.get(identifier=payload["id"])
+                if account is None:
+                    raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+                account_tokens = {
+                    "access_token": _create_token(account.id, ACCESS_TOKEN_TYPE),
+                    "refresh_token": _create_token(account.id, REFRESH_TOKEN_TYPE),
+                    "token_type": "bearer",
+                }
+                return account_tokens
+        except (jwt.ExpiredSignatureError, jwt.JWTError):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        except HTTPException as e:
+            raise e
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
     def create_account(self, data: PostgresSchemas.AccountPOST):
         account_query = select(PostgresModels.Account).where(or_(PostgresModels.Account.username == data.username, PostgresModels.Account.email == data.email))
         if self.session.scalars(account_query).first() is not None:
             return None, "Username or email existed"
-        new_account = PostgresModels.Account(username=data.username,
-                                             email=data.email,
+        new_account = PostgresModels.Account(**data.model_dump(exclude={"password"}),
                                              password=_create_hash(data.password))
         self.repository.create(new_account=new_account)
         return new_account, None
@@ -109,4 +148,7 @@ class AccountService:
         return account_tokens, None
 
     def edit_account_information(self, identifier: int, data: PostgresSchemas.AccountPUT):
-        self.repository.update(identifier=identifier, new_data=data)
+        new_account_info = self.repository.update(identifier=identifier, new_data=data)
+        if new_account_info is None:
+            return None, "Account not found"
+        return new_account_info, None

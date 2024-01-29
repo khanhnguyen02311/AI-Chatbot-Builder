@@ -36,11 +36,12 @@ class AccountRepository(BaseRepository):
                                  PostgresSchemas.AccountFULL.model_validate(new_account).model_dump_json())
 
     def update(self, identifier: int, new_data: PostgresSchemas.AccountPUT):
-        query = update(PostgresModels.Account).where(PostgresModels.Account.id == identifier).values(**new_data.model_dump(exclude_none=True))
-        self.session.execute(query)
+        query = update(PostgresModels.Account).returning(PostgresModels.Account).where(PostgresModels.Account.id == identifier).values(**new_data.model_dump(exclude_none=True))
+        new_account_data = self.session.scalar(query)
         self.session.flush()
-        # self.redis_session.setex(f"AccountFULL:{identifier}", Security.JWT_REFRESH_TOKEN_EXPIRE_MINUTES * 60,
-        #                          PostgresSchemas.AccountFULL.model_validate(self.get_no_cache(identifier)).model_dump_json())
+        self.redis_session.setex(f"AccountFULL:{identifier}", Security.JWT_REFRESH_TOKEN_EXPIRE_MINUTES * 60,
+                                 PostgresSchemas.AccountFULL.model_validate(new_account_data).model_dump_json())
+        return new_account_data
 
     def delete(self, identifier: int):
         delete_query = delete(PostgresModels.Account).where(PostgresModels.Account.id == identifier)
