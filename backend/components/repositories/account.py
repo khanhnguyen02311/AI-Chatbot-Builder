@@ -10,15 +10,21 @@ class AccountRepository(BaseRepository):
     def __init__(self, session):
         super().__init__(session=session, redis_session=REDIS_SESSION)
 
-    def get_no_cache(self, identifier: int) -> PostgresModels.Account | None:
+    def get_no_cache(self, identifier: int,
+                     with_role: bool = True) -> PostgresModels.Account | None:
         query = select(PostgresModels.Account).filter(PostgresModels.Account.id == identifier)
+        if with_role:
+            query = query.join(PostgresModels.AccountRole)
         account = self.session.scalar(query)
         return account
 
     def get(self, identifier: int) -> PostgresModels.Account:
         cached_data = self.redis_session.get(f"AccountFULL:{identifier}")
         if cached_data:
-            return PostgresModels.Account(**AccountSchemas.AccountFULL.model_load_json(cached_data))
+            json_retrieved_data = AccountSchemas.AccountFULL.model_validate_json(cached_data)
+            account = PostgresModels.Account(**json_retrieved_data.model_dump(exclude={"rel_account_role"}))
+            account.rel_account_role = PostgresModels.AccountRole(**json_retrieved_data.rel_account_role.model_dump())
+            return account
         else:
             account = self.get_no_cache(identifier)
             if account is not None:

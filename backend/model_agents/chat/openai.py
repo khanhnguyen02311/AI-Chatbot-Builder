@@ -3,7 +3,7 @@ import langchain
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.callbacks import get_openai_callback
+from langchain_community.callbacks import get_openai_callback
 from langchain.memory import ConversationBufferWindowMemory, CombinedMemory, ConversationSummaryMemory
 from . import ChatAgentBase
 from model_agents.data.schemas import chat as ChatSchemas

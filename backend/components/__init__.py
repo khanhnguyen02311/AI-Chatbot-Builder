@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from components.endpoints import super_hub
@@ -23,8 +24,15 @@ tags_metadata = [
 ]
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Do something at the start
+    yield
+    # Clean up
+
+
 def serve_api(stage: str, debug: bool):
-    server = FastAPI(debug=debug, openapi_tags=tags_metadata, redoc_url=None)
+    server = FastAPI(lifespan=lifespan, debug=debug, openapi_tags=tags_metadata, redoc_url=None)
     server.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],  # your frontend urls

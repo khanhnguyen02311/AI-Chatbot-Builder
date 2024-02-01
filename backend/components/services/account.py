@@ -5,13 +5,14 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
-from sqlalchemy import select, or_
+from sqlalchemy import select, and_, or_
 from pydantic import BaseModel, ConfigDict, Field
 from configurations import Security
 from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import account as AccountSchemas
 from components.repositories.account import AccountRepository
+from components.repositories.account_role import AccountRoleRepository
 
 ACCESS_TOKEN_TYPE = "access"
 REFRESH_TOKEN_TYPE = "refresh"
@@ -64,6 +65,8 @@ def _validate_hash(plain_password, hashed_password) -> bool:
 
 
 class AccountService:
+    """Handle all business logic related to account, including authentication and authorization"""
+
     def __init__(self, session):
         self.session = session
         self.repository = AccountRepository(session=session)
@@ -79,7 +82,8 @@ class AccountService:
                 account = repository.get(identifier=payload["sub"]["id"])
                 if account is None:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-                return account
+                session.expunge_all()
+            return account
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired")
         except jwt.JWTError:
@@ -131,16 +135,27 @@ class AccountService:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     def create_account(self, data: AccountSchemas.AccountPOST):
-        account_query = select(PostgresModels.Account).where(or_(PostgresModels.Account.username == data.username, PostgresModels.Account.email == data.email))
+        account_role_user = AccountRoleRepository(session=self.session).get_by_role(role="User")
+        if account_role_user is None:
+            return None, "Account role not found"
+        account_query = select(PostgresModels.Account).where(
+            and_(
+                or_(PostgresModels.Account.username == data.username, PostgresModels.Account.email == data.email),
+                PostgresModels.Account.id_account_role == account_role_user.id))
         if self.session.scalars(account_query).first() is not None:
             return None, "Username or email existed"
         new_account = PostgresModels.Account(**data.model_dump(exclude={"password"}),
-                                             password=_create_hash(data.password))
+                                             password=_create_hash(data.password),
+                                             id_account_role=account_role_user.id)
         self.repository.create(new_account=new_account)
         return new_account, None
 
     def validate_account(self, data: AccountSchemas.AccountLOGIN) -> tuple[Any, Any]:
-        account_query = select(PostgresModels.Account).where(or_(PostgresModels.Account.username == data.username_or_email, PostgresModels.Account.email == data.username_or_email))
+        account_role_user = AccountRoleRepository(session=self.session).get_by_role(role="User")
+        account_query = select(PostgresModels.Account).where(
+            and_(
+                or_(PostgresModels.Account.username == data.username_or_email, PostgresModels.Account.email == data.username_or_email),
+                PostgresModels.Account.id_account_role == account_role_user.id))
         account = self.session.scalars(account_query).first()
         if account is None or not _validate_hash(data.password, account.password):
             return None, "Wrong username or password"
@@ -150,6 +165,12 @@ class AccountService:
             "token_type": "bearer",
         }
         return account_tokens, None
+
+    def get_account_information(self, identifier: int):
+        account_info = self.repository.get(identifier=identifier)
+        if account_info is None:
+            return None, "Account not found"
+        return account_info, None
 
     def edit_account_information(self, identifier: int, data: AccountSchemas.AccountPUT):
         new_account_info = self.repository.update(identifier=identifier, new_data=data)

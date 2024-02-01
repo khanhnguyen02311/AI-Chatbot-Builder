@@ -1,8 +1,24 @@
 import redis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from .models import postgres as p_models
+from .models import postgres as PostgresModels
 from configurations import Postgres, SQLAlchemy, Redis
+
+
+def setup_default_data(postgres_session_factory: sessionmaker):
+    with postgres_session_factory.begin() as session:
+        check_existed = session.get(PostgresModels.AccountRole, 1)
+        if check_existed is not None:
+            return
+        for role in ["Admin", "User"]:
+            session.add(PostgresModels.AccountRole(role=role))
+        for business_field in ["E-commerce", "Education", "Healthcare", "Finance", "Real Estate", "Travel", "Sports", "Media", "Others"]:
+            session.add(PostgresModels.BusinessField(field=business_field))
+        session.flush()
+        default_admin = PostgresModels.Account(username="admin123", password="admin123", email="admin123@email.com", name="Default Admin", id_account_role=1)
+        session.add(default_admin)
+        session.commit()
+
 
 # For PostgresSQL
 POSTGRES_ENGINE = create_engine(url=Postgres.URL,
@@ -15,8 +31,10 @@ POSTGRES_SESSION_FACTORY = sessionmaker(bind=POSTGRES_ENGINE,
                                         autoflush=SQLAlchemy.AUTO_FLUSH,
                                         autocommit=SQLAlchemy.AUTO_COMMIT)
 
-p_models.Base.metadata.drop_all(POSTGRES_ENGINE)
-p_models.Base.metadata.create_all(POSTGRES_ENGINE)
+# PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
+PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
+
+setup_default_data(POSTGRES_SESSION_FACTORY)
 
 # For Redis
 REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, password=Redis.PASSWORD)
