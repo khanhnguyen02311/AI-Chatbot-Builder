@@ -1,44 +1,54 @@
 import os
 import langchain
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
-from langchain.chains import ConversationChain
+from langchain.chains import LLMChain
 from langchain.callbacks import get_openai_callback
 from langchain.memory import ConversationBufferWindowMemory, CombinedMemory, ConversationSummaryMemory
-from models.templates import ChatTemplate
+from . import ChatAgentBase
+from model_agents.data.schemas import chat as ChatSchemas
 
 
-class ChatModelOpenAI:
-    def __init__(self, message_history, template_data: ChatTemplate, model_name: str = "gpt-3.5-turbo-1106"):
+class ChatAgentOpenAI(ChatAgentBase):
+    def __init__(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 1, max_tokens: int = 2048):
+        super().__init__()
         if model_name not in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo"]:
-            raise ValueError("Model not supported for now.")
+            raise NotImplementedError("Model not supported for now.")
 
-        self.summary_memory = None
-        self.conversation_memory = None
-        self.memory = None
-        self.template = None
-        self.model = None
-
-        self.name = template_data.name
         self.model_name = model_name
-        self.template_data = template_data
+        self.model = ChatOpenAI(model_name=model_name, temperature=temperature, max_tokens=max_tokens)
+        self.prompt = None
 
-        self.load_prompt_template()
-
-    def load_prompt_template(self):
-        self.summary_memory = ConversationSummaryMemory(memory_key="summary_history", input_key="input", human_prefix="Customer")
-        self.conversation_memory = ConversationBufferWindowMemory(memory_key="conversation_history", input_key="input", human_prefix="Customer", k=5)
+        self.summary_memory = ConversationSummaryMemory(llm=self.model, memory_key="summary_history", input_key="input", human_prefix="Customer")
+        self.conversation_memory = ConversationBufferWindowMemory(memory_key="conversation_history", input_key="input", human_prefix="Customer", k=3)
         self.memory = CombinedMemory(memories=[self.summary_memory, self.conversation_memory], input_key="input")
 
-        template = """Acts as a customer service representative for a business in """ + ', '.join(self.template_data.business_fields) + """ field(s).
-- Your descriptions: """ + self.template_data.description + """
-- Business information:\n""" + self.template_data.business_information + """
-- Your communication requirements:\n""" + self.template_data.response_attitude + """
+    def load_prompt_template(self, template_data: ChatSchemas.ChatTemplate):
+        template = """You are a chatbot talking with a customer. Your role is being a customer service representative for a business in """ + ', '.join(
+            template_data.business_fields) + """ field(s). These are further information about you and the business:
+- Your descriptions: """ + template_data.description + """
+- Business information:\n""" + template_data.business_information + """
+- Your communication requirements:\n""" + template_data.response_attitude + """
+
+These are the information about the current conversation and the place to write your response.
 - Chat summary:\n{summary_history}
+
 - Chat history:\n{conversation_history}
 Customer: {input}
-AI (reply here): """
-        self.template = PromptTemplate(input_variables=["summary_memory", "conversation_memory", "input"], template=template)
+AI: """
+        self.prompt = PromptTemplate(input_variables=["summary_memory", "conversation_memory", "input"], template=template)
 
-    def load_model(self):
-        self.model = ChatOpenAI(model_name=self.template_data.model_name, template=self.template, memory=self.memory)
+    def load_model(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 1, max_token: int = 2048):
+        self.model_name = model_name
+        self.model = ChatOpenAI(model_name=model_name, temperature=temperature, max_tokens=max_token)
+
+    def load_conversation(self):
+        conversation = LLMChain(llm=self.model, memory=self.memory, prompt=self.prompt, verbose=False)
+        return conversation
+
+    def generate_response(self, new_message: str):
+        conversation = self.load_conversation()
+        with get_openai_callback() as cb:
+            response = conversation.predict(input=new_message)
+            print(cb)
+        return response

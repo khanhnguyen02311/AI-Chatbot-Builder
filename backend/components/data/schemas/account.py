@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from . import BaseModel, BaseORMModel
-from pydantic import constr, Field
+from pydantic import Field
 from faker import Faker
 
 

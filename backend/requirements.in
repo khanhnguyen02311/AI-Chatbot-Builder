@@ -2,6 +2,7 @@ wheel
 requests
 fastapi
 SQLAlchemy
+alembic
 passlib
 authlib
 python-dotenv

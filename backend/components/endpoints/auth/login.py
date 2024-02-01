@@ -1,14 +1,14 @@
 from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import JSONResponse
 from components.data import POSTGRES_SESSION_FACTORY
-from components.data.schemas import postgres as PostgresSchema
+from components.data.schemas import account as AccountSchemas
 from components.services.account import AccountService
 
 router = APIRouter()
 
 
 @router.post("/login")
-def login(account: PostgresSchema.AccountLOGIN):
+def login(account: AccountSchemas.AccountLOGIN):
     with POSTGRES_SESSION_FACTORY() as session:
         service = AccountService(session=session)
         account_tokens, err = service.validate_account(data=account)

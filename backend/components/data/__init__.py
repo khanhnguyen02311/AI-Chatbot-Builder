@@ -15,7 +15,7 @@ POSTGRES_SESSION_FACTORY = sessionmaker(bind=POSTGRES_ENGINE,
                                         autoflush=SQLAlchemy.AUTO_FLUSH,
                                         autocommit=SQLAlchemy.AUTO_COMMIT)
 
-# postgres_models.Base.metadata.drop_all(Engine)
+p_models.Base.metadata.drop_all(POSTGRES_ENGINE)
 p_models.Base.metadata.create_all(POSTGRES_ENGINE)
 
 # For Redis

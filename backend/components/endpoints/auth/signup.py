@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, status, Response
 from components.data import POSTGRES_SESSION_FACTORY
-from components.data.schemas import postgres as PostgresSchema
+from components.data.schemas import account as AccountSchema
 from components.services.account import AccountService
 
 router = APIRouter()
 
 
 @router.post("/signup")
-def signup(account: PostgresSchema.AccountPOST):
+def signup(account: AccountSchema.AccountPOST):
     with POSTGRES_SESSION_FACTORY() as session:
         service = AccountService(session=session)
         new_account, err = service.create_account(data=account)
