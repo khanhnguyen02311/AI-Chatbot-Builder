@@ -18,7 +18,7 @@ class AccountRepository(BaseRepository):
         account = self.session.scalar(query)
         return account
 
-    def get(self, identifier: int) -> PostgresModels.Account:
+    def get(self, identifier: int):
         cached_data = self.redis_session.get(f"AccountFULL:{identifier}")
         if cached_data:
             json_retrieved_data = AccountSchemas.AccountFULL.model_validate_json(cached_data)

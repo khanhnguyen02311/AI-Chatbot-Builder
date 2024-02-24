@@ -5,15 +5,15 @@ from components.data.models.postgres import Account
 from components.data.schemas.account import AccountGET, AccountPUT
 from components.services.account import AccountService
 
-router = APIRouter()
+router = APIRouter(prefix="/information")
 
 
-@router.get("/information")
+@router.get("")
 async def get_user_information(account: Account = Depends(AccountService.validate_token)):
-    return JSONResponse(content=AccountGET.model_validate(account).model_dump(mode="json"))
+    return AccountGET.model_validate(account)
 
 
-@router.put("/information")
+@router.put("")
 async def update_user_information(data: AccountPUT, account: Account = Depends(AccountService.validate_token)):
     with POSTGRES_SESSION_FACTORY() as session:
         account_service = AccountService(session=session)
@@ -22,4 +22,4 @@ async def update_user_information(data: AccountPUT, account: Account = Depends(A
             session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=err)
         session.commit()
-        return JSONResponse(content=AccountGET.model_validate(new_account_data).model_dump(mode="json"))
+        return AccountGET.model_validate(new_account_data)

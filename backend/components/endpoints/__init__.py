@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 from .auth import login, logout, signup, token
 from .model import legacy
-from .user import information
+from .user import information, business
+from .utils import business_fields
 
 super_hub = APIRouter()
 
@@ -13,3 +14,6 @@ super_hub.include_router(token.router, prefix="/auth", tags=["auth"])
 super_hub.include_router(legacy.router, prefix="/model", tags=["model"])
 
 super_hub.include_router(information.router, prefix="/user", tags=["user"])
+super_hub.include_router(business.router, prefix="/user", tags=["user"])
+
+super_hub.include_router(business_fields.router, prefix="/utils", tags=["utils"])

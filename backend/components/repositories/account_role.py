@@ -26,7 +26,7 @@ class AccountRoleRepository(BaseRepository):
                                        AccountRoleSchemas.AccountRoleFULL.model_validate(account_role).model_dump_json())
             return account_role
 
-    def get(self, identifier: int) -> PostgresModels.AccountRole:
+    def get(self, identifier: int):
         query = select(PostgresModels.AccountRole).filter(PostgresModels.AccountRole.id == identifier)
         account_role = self.session.scalar(query)
         if account_role is not None:

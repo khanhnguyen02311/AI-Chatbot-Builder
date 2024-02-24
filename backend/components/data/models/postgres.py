@@ -3,6 +3,7 @@ from typing import Annotated, Optional, List, Any
 from sqlalchemy import ForeignKey, Table, Column, Integer, Text, VARCHAR, SMALLINT, TIMESTAMP, ARRAY, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
+str16 = Annotated[str, mapped_column(VARCHAR(16))]
 str64 = Annotated[str, mapped_column(VARCHAR(64))]
 str256 = Annotated[str, mapped_column(VARCHAR(256))]
 
@@ -62,9 +63,9 @@ class Business(Base):
     name: Mapped[str64]
     description: Mapped[str]
     fields: Mapped[str_array]
-    # address: Mapped[Optional[str256]]
-    # phone: Mapped[Optional[str64]]
-    # website_url: Mapped[Optional[str64]]
+    address: Mapped[Optional[str256]]
+    phone: Mapped[Optional[str16]]
+    website_url: Mapped[Optional[str64]]
     time_created: Mapped[timestamp]
 
     id_account: Mapped[int] = Column(Integer, ForeignKey('account.id'))

@@ -65,7 +65,7 @@ def _validate_hash(plain_password, hashed_password) -> bool:
 
 
 class AccountService:
-    """Handle all business logic related to account, including authentication and authorization"""
+    """Handle complex logic related to account, including authentication and authorization"""
 
     def __init__(self, session):
         self.session = session

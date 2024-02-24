@@ -12,7 +12,9 @@ def setup_default_data(postgres_session_factory: sessionmaker):
             return
         for role in ["Admin", "User"]:
             session.add(PostgresModels.AccountRole(role=role))
-        for business_field in ["E-commerce", "Education", "Healthcare", "Finance", "Real Estate", "Travel", "Sports", "Media", "Others"]:
+            # some e-commerce type of products
+        for business_field in ["Tech", "Food & Beverage", "Fashion", "Health & Beauty", "Home & Living", "Books", "Sports & Outdoor", "Toys & Games", "Automotive",
+                               "Pet Supplies", "Others"]:
             session.add(PostgresModels.BusinessField(field=business_field))
         session.flush()
         default_admin = PostgresModels.Account(username="admin123", password="admin123", email="admin123@email.com", name="Default Admin", id_account_role=1)
