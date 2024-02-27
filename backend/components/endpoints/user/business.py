@@ -57,4 +57,5 @@ def delete_business(business_id: int, account: Account = Depends(AccountService.
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=err)
         service.delete_business(business_id)
         session.commit()
-        return BusinessSchemas.BusinessGET.model_validate(business)
+        # return BusinessSchemas.BusinessGET.model_validate(business)
+        return "Done"

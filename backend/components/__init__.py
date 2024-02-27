@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from components.endpoints import super_hub
-from components import data
+from .endpoints import super_hub
+from . import data
 
 tags_metadata = [
     {
@@ -32,14 +32,14 @@ async def lifespan(app: FastAPI):
 
 
 def serve_api(stage: str, debug: bool):
-    server = FastAPI(lifespan=lifespan, debug=debug, openapi_tags=tags_metadata, redoc_url=None)
-    server.add_middleware(
+    app = FastAPI(lifespan=lifespan, debug=debug, openapi_tags=tags_metadata, redoc_url=None)
+    app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],  # your frontend urls
         allow_credentials=True,
         allow_methods=["GET", "PUT", "POST", "DELETE", "PATCH"],  # OPTIONS method is handled by NGINX
         allow_headers=["*"]
     )
-    server.include_router(super_hub)
+    app.include_router(super_hub)
     # if stage in ['staging', 'prod']:
-    return server
+    return app

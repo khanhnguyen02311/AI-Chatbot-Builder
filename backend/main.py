@@ -1,9 +1,8 @@
 import uvicorn
-from arguments import args
+from configurations import envs, arguments
 from components import serve_api
-from configurations import App
 
-api_server = serve_api(debug=args.debug, stage=args.stage)
+api_server = serve_api(debug=arguments.debug, stage=arguments.stage)
 
 if __name__ == "__main__":
-    uvicorn.run(api_server, host="0.0.0.0", port=App.API_PORT)
+    uvicorn.run(api_server, host="0.0.0.0", port=envs.App.API_PORT)

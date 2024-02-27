@@ -1,6 +1,5 @@
 from sqlalchemy import select, update, delete
 from . import BaseRepository
-from configurations import Security
 from components.data import REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import business as BusinessSchemas

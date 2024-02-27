@@ -6,6 +6,12 @@ from .utils import business_fields
 
 super_hub = APIRouter()
 
+
+@super_hub.get("/")
+def read_main():
+    return {"msg": "Hello World"}
+
+
 super_hub.include_router(login.router, prefix="/auth", tags=["auth"])
 super_hub.include_router(logout.router, prefix="/auth", tags=["auth"])
 super_hub.include_router(signup.router, prefix="/auth", tags=["auth"])

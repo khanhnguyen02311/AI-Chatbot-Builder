@@ -1,13 +1,13 @@
 import uuid
 from datetime import timedelta, datetime
-from typing import Annotated, Any
+from typing import Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from passlib.context import CryptContext
 from sqlalchemy import select, and_, or_
-from pydantic import BaseModel, ConfigDict, Field
-from configurations import Security
+from pydantic import BaseModel
+from configurations.envs import Security
 from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import account as AccountSchemas

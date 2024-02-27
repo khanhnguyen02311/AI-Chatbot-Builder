@@ -1,5 +1,8 @@
 from os import environ
-from arguments import args
+from .arguments import parse_args
+
+# load command-line arguments before initializing the configuration classes
+args = parse_args()
 
 
 class App:

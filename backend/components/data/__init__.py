@@ -2,7 +2,7 @@ import redis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import postgres as PostgresModels
-from configurations import Postgres, SQLAlchemy, Redis
+from configurations.envs import Postgres, SQLAlchemy, Redis
 
 
 def setup_default_data(postgres_session_factory: sessionmaker):
