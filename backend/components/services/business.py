@@ -15,15 +15,15 @@ class BusinessService:
         self.repository = BusinessRepository(session=session)
         self.account = account
 
-    def get_personal_businesses(self):
-        businesses = self.repository.get_all_by_account(identifier=self.account.id)
-        return businesses
-
     def _validate_personal_business(self, business_id: int) -> tuple[Any, Any]:
         business = self.repository.get(identifier=business_id)
         if business is None or business.id_account != self.account.id:
             return False, None
         return True, business
+
+    def get_personal_businesses(self):
+        businesses = self.repository.get_all_by_account(identifier=self.account.id)
+        return businesses
 
     def get_business_data(self, business_id: int) -> tuple[Any, Any]:
         valid, business = self._validate_personal_business(business_id)

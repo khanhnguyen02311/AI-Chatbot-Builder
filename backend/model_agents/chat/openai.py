@@ -31,9 +31,11 @@ class ChatAgentOpenAI(ChatAgentBase):
 - Your communication requirements:\n""" + template_data.response_attitude + """
 
 These are the information about the current conversation and the place to write your response.
-- Chat summary:\n{summary_history}
+- Chat summary:
+{summary_history}
 
-- Chat history:\n{conversation_history}
+- Chat history:
+{conversation_history}
 Customer: {input}
 AI: """
         self.prompt = PromptTemplate(input_variables=["summary_memory", "conversation_memory", "input"], template=template)
