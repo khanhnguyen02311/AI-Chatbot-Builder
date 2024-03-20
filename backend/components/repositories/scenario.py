@@ -27,15 +27,13 @@ class ScenarioRepository(BaseRepository):
         self.session.flush()
 
     def update(self, identifier: int, new_data: ScenarioSchemas.ScenarioPUT):
-        # query = update(PostgresModels.Scenario).returning(PostgresModels.Scenario).where(PostgresModels.Scenario.id == identifier).values(**new_data.model_dump(exclude_none=True))
-        # new_scenario_data = self.session.scalar(query)
-        # self.session.flush()
-        # return new_scenario_data
-        super().update()
+        query = update(PostgresModels.Scenario).returning(PostgresModels.Scenario).where(PostgresModels.Scenario.id == identifier).values(**new_data.model_dump(exclude_none=True))
+        new_scenario_data = self.session.scalar(query)
+        self.session.flush()
+        return new_scenario_data
 
     def delete(self, identifier: int):
-        # delete_query = delete(PostgresModels.Scenario).where(PostgresModels.Scenario.id == identifier)
-        # self.session.execute(delete_query)
-        # self.session.flush()
-        # return object
-        super().delete()
+        delete_query = delete(PostgresModels.Scenario).where(PostgresModels.Scenario.id == identifier)
+        self.session.execute(delete_query)
+        self.session.flush()
+        return object

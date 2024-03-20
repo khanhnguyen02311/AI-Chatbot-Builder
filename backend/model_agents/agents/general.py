@@ -1,4 +1,6 @@
 import os
+from abc import ABC
+
 import langchain
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
@@ -9,9 +11,8 @@ from . import ChatAgentBase
 from model_agents.data.schemas import chat as ChatSchemas
 
 
-class ChatAgentOpenAI(ChatAgentBase):
+class ChatAgentGeneral(ChatAgentBase, ABC):
     def __init__(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 1, max_tokens: int = 2048):
-        super().__init__()
         if model_name not in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo"]:
             raise NotImplementedError("Model not supported for now.")
 

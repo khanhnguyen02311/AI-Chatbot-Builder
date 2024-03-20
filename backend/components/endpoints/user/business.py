@@ -12,7 +12,7 @@ router = APIRouter(prefix="/business")
 async def get_business_list(account: Account = Depends(AccountService.validate_token)):
     with POSTGRES_SESSION_FACTORY() as session:
         service = BusinessService(session=session, account=account)
-        businesses = service.get_personal_businesses()
+        businesses = service.get_user_businesses()
         return BusinessSchemas.ListBusinessGET.model_validate(businesses)
 
 
@@ -29,7 +29,7 @@ async def create_business(data: BusinessSchemas.BusinessPOST, account: Account =
 async def get_business(business_id: int, account: Account = Depends(AccountService.validate_token)):
     with POSTGRES_SESSION_FACTORY() as session:
         service = BusinessService(session=session, account=account)
-        business, err = service.get_business_data(business_id)
+        business, err = service.get_user_business(business_id)
         if err is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=err)
         return BusinessSchemas.BusinessGET.model_validate(business)
@@ -39,7 +39,7 @@ async def get_business(business_id: int, account: Account = Depends(AccountServi
 async def update_business(business_id: int, data: BusinessSchemas.BusinessPUT, account: Account = Depends(AccountService.validate_token)):
     with POSTGRES_SESSION_FACTORY() as session:
         service = BusinessService(session=session, account=account)
-        updated_business, err = service.update_business(identifier=business_id, business_data=data)
+        updated_business, err = service.update_business(business_id=business_id, business_data=data)
         if err is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=err)
         session.commit()
@@ -50,10 +50,8 @@ async def update_business(business_id: int, data: BusinessSchemas.BusinessPUT, a
 def delete_business(business_id: int, account: Account = Depends(AccountService.validate_token)):
     with POSTGRES_SESSION_FACTORY() as session:
         service = BusinessService(session=session, account=account)
-        business, err = service.get_business_data(business_id)
+        err = service.delete_business(business_id)
         if err is not None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=err)
-        service.delete_business(business_id)
         session.commit()
-        # return BusinessSchemas.BusinessGET.model_validate(business)
-        return "Done"
+        return "Deleted"

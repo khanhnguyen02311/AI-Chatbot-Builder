@@ -22,14 +22,19 @@ class ScenarioGET(BaseORMModel):
     id: int
     name: str
     time_created: datetime
-    flow: dict[str, Any]
+    flow: Json[Any]
     id_business: int
+
+
+class ListScenarioGET(BaseListModel):
+    root: list[ScenarioGET]
 
 
 class ScenarioPOST(BaseORMModel):
-    name: str = Field(min_length=5, max_length=64)
-    flow: Json[Any]
+    name: str = Field(min_length=3, max_length=64)
+    # flow: Json[Any]
     id_business: int
+    # id_bot: Optional[int] = None
 
 
 class ScenarioPUT(ScenarioPOST):

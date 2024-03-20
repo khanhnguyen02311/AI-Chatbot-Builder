@@ -1,7 +1,9 @@
+import ast
+import json
 from typing import Any, Literal
-import json, ast
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import scenario as ScenarioSchemas
+from components.repositories.business import BusinessRepository
 from components.repositories.scenario import ScenarioRepository
 
 
@@ -132,28 +134,32 @@ class Flow:
         return json.dumps(data) if output_type == "json" else str(data)
 
     @staticmethod
-    def deserialize(serialized_data: str, input_type: Literal["json", "python"] = "json"):
-        data = json.loads(serialized_data) if input_type == "json" else ast.literal_eval(serialized_data)
-        deserialized_flow = Flow()
-        deserialized_flow.next_node_id = data["nn"]
-        deserialized_flow.next_action_id = data["na"]
+    def deserialize(serialized_data: str, input_type: Literal["json", "python"] = "json") -> tuple[Any, Any]:
+        try:
+            data = json.loads(serialized_data) if input_type == "json" else ast.literal_eval(serialized_data)
+            deserialized_flow = Flow()
+            deserialized_flow.next_node_id = data["nn"]
+            deserialized_flow.next_action_id = data["na"]
 
-        for node_id_key, node_data in data["nodes"].items():
-            node_id = int(node_id_key) if input_type == "json" else node_id_key
-            deserialized_flow.nodes[node_id] = Node.from_dict(node_id, node_data)
+            for node_id_key, node_data in data["nodes"].items():
+                node_id = int(node_id_key) if input_type == "json" else node_id_key
+                deserialized_flow.nodes[node_id] = Node.from_dict(node_id, node_data)
 
-        for action_id_key, action_data in data["actions"].items():
-            action_id = int(action_id_key) if input_type == "json" else action_id_key
-            deserialized_flow.actions[action_id] = Action.from_dict(action_id, action_data)
+            for action_id_key, action_data in data["actions"].items():
+                action_id = int(action_id_key) if input_type == "json" else action_id_key
+                deserialized_flow.actions[action_id] = Action.from_dict(action_id, action_data)
 
-        for node_id_start, node_id_end_routes in data["routes"].items():
-            node_id_start = int(node_id_start) if input_type == "json" else node_id_start
-            deserialized_flow.routes[node_id_start] = {}
-            for node_id_end, route_data in node_id_end_routes.items():
-                node_id_end = int(node_id_end) if input_type == "json" else node_id_end
-                deserialized_flow.routes[node_id_start][node_id_end] = Route.from_dict(node_id_start, node_id_end, route_data)
+            for node_id_start, node_id_end_routes in data["routes"].items():
+                node_id_start = int(node_id_start) if input_type == "json" else node_id_start
+                deserialized_flow.routes[node_id_start] = {}
+                for node_id_end, route_data in node_id_end_routes.items():
+                    node_id_end = int(node_id_end) if input_type == "json" else node_id_end
+                    deserialized_flow.routes[node_id_start][node_id_end] = Route.from_dict(node_id_start, node_id_end, route_data)
 
-        return deserialized_flow
+            return deserialized_flow, None
+        except Exception as e:
+            print(e)
+            return None, "Invalid serialized data"
 
     def print_readable(self):
         print("Nodes:")
@@ -173,7 +179,51 @@ class ScenarioService:
         self.session = session
         self.repository = ScenarioRepository(session=session)
         self.account = account
+        self.loaded_flows = {}
 
-    def get_scenarios(self, scenario_id: int):
+    def get_user_scenarios(self):
+        scenarios = self.repository.get_all_by_account(identifier=self.account.id)
+        return scenarios
+
+    def get_user_scenario(self, scenario_id: int):
         scenario = self.repository.get(identifier=scenario_id)
+        if scenario is None or scenario.id_account != self.account.id:
+            return None
         return scenario
+
+    def create_scenario(self, scenario_data: ScenarioSchemas.ScenarioPOST) -> tuple[Any, Any]:
+        new_flow = Flow()
+        business_repository = BusinessRepository(session=self.session)
+        business = business_repository.get(identifier=scenario_data.id_business)
+        if business is None or business.id_account != self.account.id:
+            return None, "Business not found"
+        new_scenario = PostgresModels.Scenario(**scenario_data.model_dump(), id_account=self.account.id, flow=new_flow.serialize())
+        self.repository.create(new_scenario)
+        return new_scenario, None
+
+    def update_scenario(self, scenario_id: int, scenario_data: ScenarioSchemas.ScenarioPUT) -> tuple[Any, Any]:
+        business_repository = BusinessRepository(session=self.session)
+        business = business_repository.get(identifier=scenario_data.id_business)
+        if business is None or business.id_account != self.account.id:
+            return None, "Business not found"
+        scenario = self.get_user_scenario(scenario_id)
+        if scenario is None:
+            return None, "Scenario not found"
+        updated_scenario = self.repository.update(scenario_id, scenario_data)
+        if updated_scenario is None:
+            return None, "Scenario not found"
+        return updated_scenario, None
+
+    def delete_scenario(self, scenario_id: int) -> Any:
+        scenario = self.get_user_scenario(scenario_id)
+        if scenario is None:
+            return "Scenario not found"
+        self.repository.delete(identifier=scenario_id)
+        return None
+
+    def load_scenario_flow(self, scenario_id: int) -> Any:
+        scenario = self.repository.get(identifier=scenario_id)
+        if scenario is None or scenario.id_account != self.account.id:
+            return "Scenario not found"
+        self.loaded_flows[scenario_id] = Flow.deserialize(scenario.flow)
+        return None

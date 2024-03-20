@@ -46,3 +46,6 @@ class SQLAlchemy:
 class ChatModels:
     HUGGINGFACE_API_KEY = environ.get("HUGGINGFACE_API_KEY")
     OPENAI_API_KEY = environ.get("OPENAI_API_KEY")
+    GOOGLE_API_KEY = environ.get("GOOGLE_API_KEY")
+    GOOGLE_CSE_ID = environ.get("GOOGLE_CSE_ID")
+    OPENWEATHERMAP_API_KEY = environ.get("OPENWEATHERMAP_API_KEY")
