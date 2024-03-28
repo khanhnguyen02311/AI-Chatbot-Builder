@@ -74,7 +74,7 @@ New input: {input}
     def load_conversation(self):
         # load messages from database, for later
         self.memory = ConversationBufferWindowMemory(memory_key="conversation_history", input_key="input", ai_prefix="Assistant", k=4)
-        self.agent_chain = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=App.DEBUG)
+        self.agent_chain = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=App.DEBUG, max_execution_time=8, max_iterations=10)
 
     def generate_response(self, user_input: str):
         response = self.agent_chain.invoke({"input": user_input}, return_only_outputs=True)

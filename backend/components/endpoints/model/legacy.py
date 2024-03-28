@@ -4,6 +4,8 @@ from model_agents.agents.general import ChatAgentGeneral
 from model_agents.agents.travel import ChatAgentTravel
 from pydantic import BaseModel
 
+legacy_temp_id = 0
+
 
 class TravelModel(BaseModel):
     user_id: int
@@ -12,6 +14,13 @@ class TravelModel(BaseModel):
 
 router = APIRouter(prefix="/legacy")
 agent_map = {}
+
+
+@router.get("/new-id")
+def get_new_id():
+    global legacy_temp_id
+    legacy_temp_id += 1
+    return {"id": legacy_temp_id}
 
 
 @router.post("/general-model")

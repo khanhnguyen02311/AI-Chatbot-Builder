@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_chat import message
-from pages.controllers import _AuthController, BotEditorController
-from streamlit_extras.switch_page_button import switch_page
+from pages.controllers import BotEditorController, AuthController
+from Menu import menu_with_redirect
 
 
 def on_new_msg():
@@ -10,17 +10,9 @@ def on_new_msg():
     st.session_state["var_messages_" + selected_bot].append({"content": "Hello! I'm a chatbot.", "is_user": False})
 
 
-# add a smile icon
 st.set_page_config(page_title="Bot Viewer")
 st.title("💬 Bot Viewer")
-
-# check user credentials
-if "logged_in_as" not in st.session_state or st.session_state["logged_in_as"] == "":
-    st.warning("You are not logged in! Please log in to use this feature.")
-    back_button = st.button("Back to Homepage")
-    if back_button:
-        switch_page("Home")
-    st.stop()
+menu_with_redirect()
 
 selected_bot = st.sidebar.selectbox("Select a bot", BotEditorController.get_bot_list(st.session_state))
 if selected_bot != "":
@@ -50,7 +42,3 @@ with st.container():
 #         message_placeholder = st.empty()
 #         st.session_state.messages.append({"role": "assistant", "content": "Hello! I'm a chatbot."})
 #         message_placeholder.markdown("Hello! I'm a chatbot.")
-
-
-st.sidebar.markdown(f"### Logged in as {st.session_state['logged_in_as']}")
-st.sidebar.button("Logout", on_click=_AuthController.logout)

@@ -1,18 +1,11 @@
 import streamlit as st
-from streamlit_extras.switch_page_button import switch_page
-from pages.controllers import _AuthController, BotEditorController
+from pages.controllers import BotEditorController, AuthController
+from Menu import menu_with_redirect
 
-st.set_page_config(page_title="Bot Viewer")
+st.set_page_config(page_title="Bot Editor")
 st.title("🤖 Bot Editor")
+menu_with_redirect()
 BotEditorController.init_testdata(st.session_state)
-
-# check user credentials
-if "logged_in_as" not in st.session_state or st.session_state["logged_in_as"] == "":
-    st.warning("You are not logged in! Please log in to use this feature.")
-    back_button = st.button("Back to Homepage")
-    if back_button:
-        switch_page("Home")
-    st.stop()
 
 bot_list = BotEditorController.get_bot_list(st.session_state) + tuple(["Create new bot..."])
 business_field_list = BotEditorController.get_business_field_list()
@@ -53,6 +46,3 @@ chatbot_form.markdown("#### Chatbot Information")
 chatbot_form.text_input("Name", key="var_bot_name", disabled=st.session_state["var_bot_existed"])
 chatbot_form.text_area("Description", key="var_bot_description", help="Provide a short description of your chatbot.")
 chatbot_form.text_area("Response Attitude", key="var_bot_response_attitude", help="How should your chatbot respond?")
-
-st.sidebar.markdown(f"### Logged in as {st.session_state['logged_in_as']}")
-st.sidebar.button("Logout", on_click=_AuthController.logout)
