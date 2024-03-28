@@ -1,3 +1,4 @@
 .env.dev
 .env.staging
 .env.prod
+note.txt

@@ -1,0 +1,21 @@
+.user-info{
+    display: flex;
+    height: 8vh;
+    align-items: center;
+    font-size: large;
+    box-shadow: none;
+    transition: box-shadow 0.3s ease;
+}
+
+.user{
+    padding: 0px 10px;
+}
+
+.user-info:hover img {
+    display: block;
+}
+
+.user-info:hover {
+    box-shadow: 0 0 5px rgba(28, 27, 27, 0.3);
+    border-radius: 5%;
+}

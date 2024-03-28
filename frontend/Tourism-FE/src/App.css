@@ -1,0 +1,9 @@
+#root {
+  max-width: 1280px;
+  margin: 0;
+  top: 0;
+  
+}
+body, html { 
+  font-family: sans-serif;
+}
