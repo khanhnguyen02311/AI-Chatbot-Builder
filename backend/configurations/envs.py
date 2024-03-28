@@ -49,3 +49,8 @@ class ChatModels:
     GOOGLE_API_KEY = environ.get("GOOGLE_API_KEY")
     GOOGLE_CSE_ID = environ.get("GOOGLE_CSE_ID")
     OPENWEATHERMAP_API_KEY = environ.get("OPENWEATHERMAP_API_KEY")
+
+
+class Chat:
+    FACEBOOK_VERIFY_TOKEN = environ.get("FACEBOOK_VERIFY_TOKEN")
+    FACEBOOK_PAGE_ACCESS_TOKEN = environ.get("FACEBOOK_PAGE_ACCESS_TOKEN")
