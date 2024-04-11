@@ -69,13 +69,14 @@ def _validate_hash(plain_password, hashed_password) -> bool:
 class AccountService:
     """ Handle complex logic related to account, including authentication and authorization
 
-    validate_token      (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME, return_type: str = "account"))
-    validate_token_chat (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
-    deactivate_token    (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
-    renew_token         (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
+    - validate_token      (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME, return_type: str = "account"))
+    - validate_token_chat (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
+    - deactivate_token    (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
+    - renew_token         (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
 
-    create_account              (self, data: AccountSchemas.AccountPOST)
-    validate_account            (self, data: AccountSchemas.AccountLOGIN) -> tuple[Any, Any]
+    - create_account_pair (self, data: AccountSchemas.AccountPOST) -> tuple[Any, Any]
+    - create_chat_account (self, data: ChatAccountSchemas.ChatAccountPOST) -> tuple[Any, Any]
+    - validate_account    (self, data: AccountSchemas.AccountLOGIN) -> tuple[Any, Any]
     """
 
     def __init__(self, session):
@@ -153,16 +154,16 @@ class AccountService:
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    def create_account(self, data: AccountSchemas.AccountPOST):
+    def create_account_pair(self, data: AccountSchemas.AccountPOST) -> tuple[Any, Any]:
         user_role = AccountRoleRepository(session=self.session).get_by_role(role="User")
         if user_role is None:
-            return None, "Account role not found"
+            return [], "Account role not found"
         account_query = select(PostgresModels.Account).where(
             and_(
                 or_(PostgresModels.Account.username == data.username, PostgresModels.Account.email == data.email),
                 PostgresModels.Account.id_account_role == user_role.id))
         if self.session.scalars(account_query).first() is not None:
-            return None, "Username or email existed"
+            return [], "Username or email existed"
         # create account
         new_account = PostgresModels.Account(**data.model_dump(exclude={"password"}),
                                              password=_create_hash(data.password),
@@ -171,7 +172,12 @@ class AccountService:
         # create chat account
         new_chat_account = PostgresModels.ChatAccount(account_type="internal", id_internal_account=new_account.id)
         ChatAccountRepository(session=self.session).create(new_chat_account)
-        return new_account, None
+        return [new_account, new_chat_account], None
+
+    def create_chat_account(self, data: ChatAccountSchemas.ChatAccountPOST) -> tuple[Any, Any]:
+        new_chat_account = PostgresModels.ChatAccount(**data.model_dump(exclude_none=True))
+        ChatAccountRepository(session=self.session).create(new_chat_account)
+        return new_chat_account, None
 
     def validate_account(self, data: AccountSchemas.AccountLOGIN) -> tuple[Any, Any]:
         user_role = AccountRoleRepository(session=self.session).get_by_role(role="User")

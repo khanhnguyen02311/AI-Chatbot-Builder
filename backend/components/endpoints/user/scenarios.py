@@ -5,7 +5,7 @@ from components.data.schemas import scenario as ScenarioSchemas
 from components.services.account import AccountService
 from components.services.scenario import ScenarioService
 
-router = APIRouter(prefix="/scenario")
+router = APIRouter(prefix="/scenarios")
 
 
 @router.get("")

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated, Optional, List, Any
-from sqlalchemy import ForeignKey, Column, INTEGER, TEXT, VARCHAR, SMALLINT, TIMESTAMP, ARRAY, JSON, BIGINT, FLOAT
+from sqlalchemy import ForeignKey, Column, INTEGER, TEXT, VARCHAR, SMALLINT, TIMESTAMP, ARRAY, JSON, BIGINT, FLOAT, BOOLEAN
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 str16 = Annotated[str, mapped_column(VARCHAR(16))]
@@ -126,10 +126,11 @@ class Bot(Base):
     __tablename__ = 'bot'
     id: Mapped[int_PK]
     name: Mapped[str64]
-    model_temperature: Mapped[float] = Column(FLOAT, default=0.7)
-    model_name: Mapped[str64]
     description: Mapped[str]
-    instruction: Mapped[str]
+    is_public: Mapped[bool] = Column(BOOLEAN, default=False)
+    conf_model_temperature: Mapped[float] = Column(FLOAT, default=0.7)
+    conf_model_name: Mapped[str64]
+    conf_instruction: Mapped[str]
     time_created: Mapped[timestamp]
 
     id_account: Mapped[int] = Column(INTEGER, ForeignKey('account.id'))
@@ -185,7 +186,7 @@ class ChatSession(Base):
     __tablename__ = 'chat_session'
     id: Mapped[int_PK]
     name: Mapped[str64]
-    human_reply: Mapped[bool]  # True if a user is replying, False if bot is replying
+    human_reply: Mapped[bool] = Column(BOOLEAN, default=False)  # True if a user is replying, False if bot is replying
     time_created: Mapped[timestamp]
 
     id_chat_account: Mapped[int] = Column(INTEGER, ForeignKey('chat_account.id'))

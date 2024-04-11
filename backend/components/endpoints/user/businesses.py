@@ -5,7 +5,7 @@ from components.data.schemas import business as BusinessSchemas
 from components.services.account import AccountService
 from components.services.business import BusinessService
 
-router = APIRouter(prefix="/business")
+router = APIRouter(prefix="/businesses")
 
 
 @router.get("")

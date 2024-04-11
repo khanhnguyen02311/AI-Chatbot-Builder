@@ -1,27 +1,8 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .endpoints import super_hub
+from .endpoints import super_hub, tags_metadata
 from . import data
-
-tags_metadata = [
-    {
-        "name": "system",
-        "description": "Operations with application system",
-    },
-    {
-        "name": "auth",
-        "description": "Operations with authentication methods & user validation",
-    },
-    {
-        "name": "user",
-        "description": "Operations with user information",
-    },
-    {
-        "name": "model",
-        "description": "Operations with AI models & agents",
-    },
-]
 
 
 @asynccontextmanager

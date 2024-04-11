@@ -19,12 +19,9 @@ class ChatService:
         self.chat_account_repository = ChatAccountRepository(session=session)
 
     def create_external_chat_account(self, data: ChatAccountSchemas.ChatAccountPOST):
-        """Create a new external chat account"""
+        """Create a new external chat account, mainly used for other platforms"""
 
-        account = self.account_repository.get(data.account_id)
-        if account is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
-        chat_account = PostgresModels.ChatAccount(**data.model_dump())
+        chat_account = PostgresModels.ChatAccount(**data.model_dump(exclude_none=True))
         self.chat_account_repository.create(chat_account)
         return chat_account
 

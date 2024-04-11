@@ -10,7 +10,7 @@ router = APIRouter()
 def signup(account: AccountSchema.AccountPOST):
     with POSTGRES_SESSION_FACTORY() as session:
         service = AccountService(session=session)
-        new_account, err = service.create_account(data=account)
+        new_account, err = service.create_account_pair(data=account)
         if err is not None:
             session.rollback()
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=err)
