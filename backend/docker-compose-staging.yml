@@ -1,7 +1,5 @@
 # docker compose -p assistant-builder-staging -f docker-compose-staging.yml --env-file .env.staging up
 
-version: '4'
-
 services:
   db-postgres:
     image: postgres:15

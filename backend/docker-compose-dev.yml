@@ -1,7 +1,5 @@
 # docker compose -p assistant-builder-dev -f docker-compose-dev.yml --env-file .env.dev up
 
-version: '4'
-
 services:
   db-postgres:
     image: postgres:15

@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Annotated, Optional, List, Any
-from sqlalchemy import ForeignKey, Table, Column, Integer, Text, VARCHAR, SMALLINT, TIMESTAMP, ARRAY, JSON
+from sqlalchemy import ForeignKey, Column, INTEGER, TEXT, VARCHAR, SMALLINT, TIMESTAMP, ARRAY, JSON, BIGINT, FLOAT
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 
 str16 = Annotated[str, mapped_column(VARCHAR(16))]
@@ -9,13 +9,14 @@ str256 = Annotated[str, mapped_column(VARCHAR(256))]
 
 int_PK = Annotated[int, mapped_column(primary_key=True)]
 smallint = Annotated[int, mapped_column(SMALLINT)]
+bigint = Annotated[int, mapped_column(BIGINT)]
 timestamp = Annotated[datetime, mapped_column(TIMESTAMP, default=datetime.utcnow)]
 str_array = Annotated[List[str], mapped_column(ARRAY(VARCHAR(64)))]
 
 
 class Base(DeclarativeBase):
     type_annotation_map = {
-        str: Text,
+        str: TEXT,
         dict[str, Any]: JSON,
     }
 
@@ -33,15 +34,15 @@ class Account(Base):
     name: Mapped[str64]
     time_created: Mapped[timestamp]
 
-    id_account_role: Mapped[int] = Column(Integer, ForeignKey('account_role.id'))
+    id_account_role: Mapped[int] = Column(INTEGER, ForeignKey('account_role.id'))
     rel_account_role: Mapped['AccountRole'] = relationship('AccountRole', back_populates='rel_accounts')
 
-    id_visitor: Mapped[Optional[int]] = Column(Integer, ForeignKey('visitor.id'))
-    rel_visitor: Mapped[Optional['Visitor']] = relationship('Visitor')
+    # id_chat_account: Mapped[[int]] = Column(INTEGER, ForeignKey('chat_account.id'))
+    # rel_chat_account: Mapped[['ChatAccount']] = relationship('ChatAccount')
 
-    rel_scenarios: Mapped[List['Scenario']] = relationship('Scenario', back_populates='rel_account')
-    rel_businesses: Mapped[List['Business']] = relationship('Business', back_populates='rel_account')
-    rel_bots: Mapped[List['Bot']] = relationship('Bot', back_populates='rel_account')
+    rel_scenarios: Mapped[List['Scenario']] = relationship('Scenario', back_populates='rel_account', uselist=True)
+    rel_businesses: Mapped[List['Business']] = relationship('Business', back_populates='rel_account', uselist=True)
+    rel_bots: Mapped[List['Bot']] = relationship('Bot', back_populates='rel_account', uselist=True)
 
 
 class AccountRole(Base):
@@ -51,20 +52,9 @@ class AccountRole(Base):
 
     __tablename__ = 'account_role'
     id: Mapped[int_PK]
-    role: Mapped[str64]
+    role: Mapped[str16]  # admin / user
 
     rel_accounts: Mapped[List[Account]] = relationship('Account', back_populates='rel_account_role', uselist=True)
-
-
-class Visitor(Base):
-    """Store chat visitor information. \n"""
-
-    __tablename__ = 'visitor'
-    id: Mapped[int_PK]
-    visitor_type: Mapped[str16]
-    visitor_id: Mapped[int]
-    name: Mapped[Optional[str64]]
-    time_created: Mapped[timestamp]
 
 
 class Business(Base):
@@ -82,15 +72,30 @@ class Business(Base):
     website_url: Mapped[Optional[str64]]
     time_created: Mapped[timestamp]
 
-    id_account: Mapped[int] = Column(Integer, ForeignKey('account.id'))
+    id_account: Mapped[int] = Column(INTEGER, ForeignKey('account.id'))
     rel_account: Mapped[Account] = relationship('Account', back_populates='rel_businesses')
 
-    rel_business_products: Mapped[List['BusinessProduct']] = relationship('BusinessProduct', back_populates='rel_business')
-    rel_scenarios: Mapped[List['Scenario']] = relationship('Scenario', back_populates='rel_business')
+    rel_business_products: Mapped[List['BusinessProduct']] = relationship('BusinessProduct', back_populates='rel_business', uselist=True)
+    rel_scenarios: Mapped[List['Scenario']] = relationship('Scenario', back_populates='rel_business', uselist=True)
+
+
+# class BusinessAdmin(Base):
+#     """Store business admin information \n
+#    Primary key: id \n
+#    Foreign key: id_business -> Business"""
+#
+#     __tablename__ = 'business_admin'
+#     id: Mapped[int_PK]
+#     admin_type: Mapped[str16]
+#     id_business: Mapped[int]
+#     id_account: Mapped[int]
+#     time_created: Mapped[timestamp]
+#
+#     rel_business: Mapped[Business] = relationship('Business')
+#     rel_account: Mapped[Account] = relationship('Account')
 
 
 class BusinessField(Base):
-
     """Store business field information\n"""
 
     __tablename__ = 'business_field'
@@ -111,26 +116,33 @@ class BusinessProduct(Base):
     url: Mapped[Optional[str256]]
     time_created: Mapped[timestamp]
 
-    id_business: Mapped[int] = Column(Integer, ForeignKey('business.id'))
+    id_business: Mapped[int] = Column(INTEGER, ForeignKey('business.id'))
     rel_business: Mapped[Business] = relationship('Business', back_populates='rel_business_products')
 
 
 class Bot(Base):
-    """Store bot information \n
-   Primary key: id \n
-   Foreign key: id_business -> Business"""
+    """Store bot information"""
 
     __tablename__ = 'bot'
     id: Mapped[int_PK]
     name: Mapped[str64]
-    description: Mapped[str]
+    model_temperature: Mapped[float] = Column(FLOAT, default=0.7)
     model_name: Mapped[str64]
-    prompt: Mapped[str]
-    prompt_tools: Mapped[str_array]
+    description: Mapped[str]
+    instruction: Mapped[str]
     time_created: Mapped[timestamp]
 
-    id_account: Mapped[int] = Column(Integer, ForeignKey('account.id'))
+    id_account: Mapped[int] = Column(INTEGER, ForeignKey('account.id'))
     rel_account: Mapped[Account] = relationship('Account', back_populates='rel_bots')
+
+
+# class BotModel(Base):
+#     """Store bot model information \n
+#    Primary key: id \n"""
+#
+#     __tablename__ = 'bot_model'
+#     id: Mapped[int_PK]
+#     name: Mapped[str64]
 
 
 class Scenario(Base):
@@ -140,47 +152,64 @@ class Scenario(Base):
     __tablename__ = 'scenario'
     id: Mapped[int_PK]
     name: Mapped[str64]
-    time_created: Mapped[timestamp]
     flow: Mapped[dict[str, Any]]
+    time_created: Mapped[timestamp]
 
-    id_account: Mapped[int] = Column(Integer, ForeignKey('account.id'))
+    id_account: Mapped[int] = Column(INTEGER, ForeignKey('account.id'))
     rel_account: Mapped[Account] = relationship('Account', back_populates='rel_scenarios')
 
-    id_business: Mapped[int] = Column(Integer, ForeignKey('business.id'))
+    id_business: Mapped[int] = Column(INTEGER, ForeignKey('business.id'))
     rel_business: Mapped[Business] = relationship('Business', back_populates='rel_scenarios')
 
-    id_bot: Mapped[int] = Column(Integer, ForeignKey('bot.id'))
+    id_bot: Mapped[int] = Column(INTEGER, ForeignKey('bot.id'))
     # rel_bot: Mapped[Bot] = relationship('Bot', back_populates='rel_scenarios')
 
 
+class ChatAccount(Base):
+    """Store chat account information. \n"""
+
+    __tablename__ = 'chat_account'
+    id: Mapped[int_PK]
+    account_type: Mapped[str16]  # type of linked account (internal / facebook / zalo / ...)
+    name: Mapped[Optional[str64]]
+    id_external_account: Mapped[Optional[str64]]  # id of external account
+    time_created: Mapped[timestamp]
+
+    id_internal_account: Mapped[Optional[int]] = Column(INTEGER, ForeignKey('account.id'))  # id of linked internal account
+    rel_account: Mapped[Optional[Account]] = relationship('Account')
+
+
 class ChatSession(Base):
-    """Store chat information \n
-   Primary key: id \n
-   Foreign key: id_scenario -> Scenario"""
+    """Store chat information \n"""
 
     __tablename__ = 'chat_session'
     id: Mapped[int_PK]
-    account_type: Mapped[str16]
+    name: Mapped[str64]
+    human_reply: Mapped[bool]  # True if a user is replying, False if bot is replying
     time_created: Mapped[timestamp]
 
-    id_visitor: Mapped[int] = Column(Integer, ForeignKey('visitor.id'))
+    id_chat_account: Mapped[int] = Column(INTEGER, ForeignKey('chat_account.id'))
+    # rel_chat_account: Mapped[ChatAccount] = relationship('ChatAccount')
 
-    # id_scenario: Mapped[int] = Column(Integer, ForeignKey('scenario.id'))
-    # rel_scenario: Mapped[Scenario] = relationship('Scenario', back_populates='rel_chats')
-
-    id_bot: Mapped[int] = Column(Integer, ForeignKey('bot.id'))
+    id_bot: Mapped[int] = Column(INTEGER, ForeignKey('bot.id'))
     # rel_bot: Mapped[Bot] = relationship('Bot', back_populates='rel_chats')
+
+    # preferred way to run chat session
+    # id_scenario: Mapped[int] = Column(INTEGER, ForeignKey('scenario.id'))
+    # rel_scenario: Mapped[Scenario] = relationship('Scenario', back_populates='rel_chats')
 
 
 class ChatMessage(Base):
     """Store chat message information \n
    Primary key: id \n
-   Foreign key: id_chat -> Chat"""
+   Foreign key: id_chat_session -> ChatSession"""
 
     __tablename__ = 'chat_message'
     id: Mapped[int_PK]
     message: Mapped[str]
     time_created: Mapped[timestamp]
 
-    id_chat: Mapped[int] = Column(Integer, ForeignKey('chat.id'))
-    # rel_chat: Mapped[Chat] = relationship('Chat', back_populates='rel_messages')
+    id_chat_session: Mapped[int] = Column(INTEGER, ForeignKey('chat_session.id'))
+
+    id_chat_account: Mapped[Optional[int]] = Column(INTEGER, ForeignKey('chat_account.id'))
+    # rel_chat_account: Mapped[ChatAccount] = relationship('ChatAccount')

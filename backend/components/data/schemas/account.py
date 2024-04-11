@@ -22,7 +22,7 @@ class AccountFULL(BaseORMModel):
     email: str
     time_created: datetime
     id_account_role: int
-    rel_account_role: AccountRoleGET | None = None
+    # rel_account_role: AccountRoleGET | None = None
 
 
 class AccountGET(BaseORMModel):
@@ -30,7 +30,7 @@ class AccountGET(BaseORMModel):
     name: str
     username: str
     email: str
-    rel_account_role: AccountRoleGET | None = None
+    # rel_account_role: AccountRoleGET | None = None
 
 
 class AccountPOST(BaseORMModel):
