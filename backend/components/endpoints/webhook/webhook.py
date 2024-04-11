@@ -1,17 +1,17 @@
-from fastapi import APIRouter,Request,Response
+from fastapi import APIRouter, Request, Response
 from configurations.envs import Chat
 
-router = APIRouter(prefix="/webhook")
+router = APIRouter()
 
 
 @router.get("")
 async def init_messenger(request: Request):
-	# FB sends the verify token as hub.verify_token
+    # FB sends the verify token as hub.verify_token
     fb_token = request.query_params.get("hub.verify_token")
 
     # we verify if the token sent matches our verify token
     if fb_token == Chat.FACEBOOK_VERIFY_TOKEN:
-    	# respond with hub.challenge parameter from the request.
+        # respond with hub.challenge parameter from the request.
         return Response(content=request.query_params["hub.challenge"])
     return 'Failed to verify token'
 

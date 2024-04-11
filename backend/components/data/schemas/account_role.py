@@ -12,4 +12,5 @@ class AccountRoleGET(BaseORMModel):
 
 
 class AccountRolePUT(BaseORMModel):
-    role: str = Field(max_length=64)
+    id: int
+    role: str = Field(max_length=16)

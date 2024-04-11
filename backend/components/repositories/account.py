@@ -1,3 +1,4 @@
+from abc import ABC
 from sqlalchemy import select, update, delete
 from . import BaseRepository
 from configurations.envs import Security
@@ -6,7 +7,7 @@ from components.data.models import postgres as PostgresModels
 from components.data.schemas import account as AccountSchemas
 
 
-class AccountRepository(BaseRepository):
+class AccountRepository(BaseRepository, ABC):
     def __init__(self, session):
         super().__init__(session=session, redis_session=REDIS_SESSION)
 
@@ -22,8 +23,8 @@ class AccountRepository(BaseRepository):
         cached_data = self.redis_session.get(f"AccountFULL:{identifier}")
         if cached_data:
             json_retrieved_data = AccountSchemas.AccountFULL.model_validate_json(cached_data)
-            account = PostgresModels.Account(**json_retrieved_data.model_dump(exclude={"rel_account_role"}))
-            account.rel_account_role = PostgresModels.AccountRole(**json_retrieved_data.rel_account_role.model_dump())
+            account = PostgresModels.Account(**json_retrieved_data.model_dump())
+            # account.rel_account_role = PostgresModels.AccountRole(**json_retrieved_data.rel_account_role.model_dump())
             return account
         else:
             account = self.get_no_cache(identifier)
