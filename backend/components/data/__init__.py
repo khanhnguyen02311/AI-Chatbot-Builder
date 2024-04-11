@@ -38,7 +38,7 @@ POSTGRES_SESSION_FACTORY = sessionmaker(bind=POSTGRES_ENGINE,
                                         autoflush=SQLAlchemy.AUTO_FLUSH,
                                         autocommit=SQLAlchemy.AUTO_COMMIT)
 
-PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
+# PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
 PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
 
 setup_default_data(POSTGRES_SESSION_FACTORY)
