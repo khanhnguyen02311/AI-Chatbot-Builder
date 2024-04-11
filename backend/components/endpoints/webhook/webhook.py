@@ -25,4 +25,4 @@ async def get_messenger(request: Request):
         received_message = data['entry'][0]['messaging'][0]['message']['text']
         # handleMessage(sender_id, received_message)
         # Further processing of the webhook data can be done here
-    return '{"status": "ok"}'
+    return {"status": "ok"}
