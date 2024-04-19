@@ -11,7 +11,7 @@ def setup_default_data(postgres_session_factory: sessionmaker):
         if check_existed is not None:
             return
         print("Setting up default data")
-        for role in ["Admin", "User"]:
+        for role in PostgresModels.CONSTANTS.AccountRole_role:
             session.add(PostgresModels.AccountRole(role=role))
             # some e-commerce type of products
         for business_field in ["Tech", "Food & Beverage", "Fashion", "Health & Beauty", "Home & Living", "Books", "Sports & Outdoor", "Toys & Games", "Automotive",
@@ -22,7 +22,7 @@ def setup_default_data(postgres_session_factory: sessionmaker):
         session.flush()
         default_admin = PostgresModels.Account(username="admin123", password="admin123", email="admin123@email.com", name="Default Admin", id_account_role=1)
         session.add(default_admin)
-        default_admin_chat = PostgresModels.ChatAccount(account_type="internal", id_internal_account=default_admin.id)
+        default_admin_chat = PostgresModels.ChatAccount(account_type=PostgresModels.CONSTANTS.ChatAccount_account_type[0], id_internal_account=default_admin.id)
         session.add(default_admin_chat)
         session.commit()
 

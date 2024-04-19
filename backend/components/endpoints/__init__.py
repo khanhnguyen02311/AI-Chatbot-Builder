@@ -4,7 +4,7 @@ from .model import legacy
 from .user import information, businesses, scenarios, bots as user_bots
 from .public import business_fields, bot_models, bots as public_bots
 from .webhook import webhook
-from .chat import session
+from .chat import sessions
 
 tags_metadata = [
     {"name": "Admin", "description": "Operations with application system & user roles"},
@@ -17,6 +17,7 @@ tags_metadata = [
     {"name": "Public", "description": "Publicly available information / utilities"},
     {"name": "Webhook", "description": "Operations with webhook endpoints, used by other platforms / services"},
     {"name": "Chat", "description": "Operations with chat sessions, messages & interactions"},
+    {"name": "Others"}
 ]
 
 super_hub = APIRouter()
@@ -45,4 +46,4 @@ super_hub.include_router(public_bots.router, prefix="/public", tags=["Public"])
 
 super_hub.include_router(webhook.router, prefix="/webhook", tags=["Webhook"])
 
-super_hub.include_router(session.router, prefix="/chat", tags=["Chat"])
+super_hub.include_router(sessions.router, prefix="/chat", tags=["Chat"])

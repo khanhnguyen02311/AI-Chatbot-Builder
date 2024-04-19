@@ -1,7 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Optional, List, Any
 from sqlalchemy import ForeignKey, Column, INTEGER, TEXT, VARCHAR, SMALLINT, TIMESTAMP, ARRAY, JSON, BIGINT, FLOAT, BOOLEAN
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+
+
+def aware_utcnow():
+    # datetime.utcnow() is deprecated
+    return datetime.now(timezone.utc)
+
 
 str16 = Annotated[str, mapped_column(VARCHAR(16))]
 str64 = Annotated[str, mapped_column(VARCHAR(64))]
@@ -10,8 +16,14 @@ str256 = Annotated[str, mapped_column(VARCHAR(256))]
 int_PK = Annotated[int, mapped_column(primary_key=True)]
 smallint = Annotated[int, mapped_column(SMALLINT)]
 bigint = Annotated[int, mapped_column(BIGINT)]
-timestamp = Annotated[datetime, mapped_column(TIMESTAMP, default=datetime.utcnow)]
+timestamp = Annotated[datetime, mapped_column(TIMESTAMP, default=aware_utcnow)]
 str_array = Annotated[List[str], mapped_column(ARRAY(VARCHAR(64)))]
+
+
+class CONSTANTS:
+    AccountRole_role = ['Admin', 'User']
+    ChatAccount_account_type = ['internal', 'facebook', 'zalo']
+    ChatMessage_type = ['bot', 'bot-form', 'admin', 'user', 'user-options']
 
 
 class Base(DeclarativeBase):
@@ -128,9 +140,10 @@ class Bot(Base):
     name: Mapped[str64]
     description: Mapped[str]
     is_public: Mapped[bool] = Column(BOOLEAN, default=False)
-    conf_model_temperature: Mapped[float] = Column(FLOAT, default=0.7)
+    conf_model_temperature: Mapped[float] = Column(FLOAT, default=0.5)
     conf_model_name: Mapped[str64]
     conf_instruction: Mapped[str]
+    conf_external_data: Mapped[Optional[str]]
     time_created: Mapped[timestamp]
 
     id_account: Mapped[int] = Column(INTEGER, ForeignKey('account.id'))
@@ -186,7 +199,7 @@ class ChatSession(Base):
     __tablename__ = 'chat_session'
     id: Mapped[int_PK]
     name: Mapped[str64]
-    human_reply: Mapped[bool] = Column(BOOLEAN, default=False)  # True if a user is replying, False if bot is replying
+    human_reply: Mapped[bool] = Column(BOOLEAN, default=False)  # True if an admin user is replying, False if bot is replying
     time_created: Mapped[timestamp]
 
     id_chat_account: Mapped[int] = Column(INTEGER, ForeignKey('chat_account.id'))
@@ -207,7 +220,8 @@ class ChatMessage(Base):
 
     __tablename__ = 'chat_message'
     id: Mapped[int_PK]
-    message: Mapped[str]
+    type: Mapped[str16]  # bot / bot-form / admin / user-text / user-options
+    content: Mapped[str]
     time_created: Mapped[timestamp]
 
     id_chat_session: Mapped[int] = Column(INTEGER, ForeignKey('chat_session.id'))

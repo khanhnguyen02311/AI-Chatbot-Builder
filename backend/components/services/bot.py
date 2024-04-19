@@ -6,6 +6,7 @@ from components.data.models import postgres as PostgresModels
 from components.data.schemas import bot as BotSchemas
 from components.repositories.account import AccountRepository
 from components.repositories.bot import BotRepository
+from model_agents.agents.account import AccountAgent
 
 
 class BotService:
@@ -27,6 +28,10 @@ class BotService:
         """Create a new bot"""
 
         new_bot = PostgresModels.Bot(**bot_data.model_dump(), id_account=account.id)
+        try:
+            _ = AccountAgent(new_bot, None)
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         self.bot_repository.create(new_bot)
         return new_bot
 

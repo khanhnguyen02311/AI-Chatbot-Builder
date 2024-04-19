@@ -11,7 +11,7 @@ from . import ChatAgentBase
 from model_agents.tools import get_tools_by_names
 
 
-class ChatAgentTravel(ChatAgentBase, ABC):
+class TravelAgent(ChatAgentBase, ABC):
     def __init__(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 0.5, max_tokens: int = 2048):
         self.prompt = None
         self.tools = []
@@ -20,13 +20,13 @@ class ChatAgentTravel(ChatAgentBase, ABC):
         self.agent_chain = None
         self.memory = None
 
-        self.load_prompt_template()
+        self.load_prompt_template("temp")
         self.load_tools(["google_search", "weather_search"])
         self.load_model(model_name, temperature, max_tokens)
         self.load_conversation()
         # self.memory = CombinedMemory(memories=[self.summary_memory, self.conversation_memory], input_key="input")
 
-    def load_prompt_template(self):
+    def load_prompt_template(self, prompt):
         template = """You are Assistant, a large language model trained by OpenAI. Assistant will play the role of a travel chatbot specialized in Vietnamese tourism.
 Assistant is a powerful chatbot that can help with a wide range of tasks and provide valuable, true information on a wide range of topics related to travel and tourism. Whether the Human need help with a specific question or just want to have a conversation about a particular subject, Assistant is here to assist.
 As a language model, Assistant is able to generate human-like text based on the input it received, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
@@ -67,7 +67,7 @@ New input: {input}
     def load_tools(self, tool_list: list):
         self.tools = get_tools_by_names(tool_list)
 
-    def load_model(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 1, max_token: int = 2048):
+    def load_model(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 0.5, max_token: int = 2048):
         self.llm = ChatOpenAI(model_name=model_name, temperature=temperature, max_tokens=max_token)
         self.agent = create_react_agent(llm=self.llm, tools=self.tools, prompt=self.prompt)
 

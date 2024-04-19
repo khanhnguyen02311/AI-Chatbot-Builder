@@ -5,21 +5,27 @@ from pydantic import Field
 
 class ChatMessageFULL(BaseORMModel):
     id: int
+    type: str
+    content: str
+    time_created: datetime
     id_chat_session: int
     id_chat_account: int | None = None
-    message: str
-    time_created: datetime
 
 
 class ChatMessageGET(BaseORMModel):
     id: int
-    id_chat_session: int
-    id_chat_account: int | None = None
-    message: str
+    type: str
+    content: str
     time_created: datetime
+    # id_chat_session: int
+    id_chat_account: int | None = None
+
+
+class ListChatMessageGET(BaseListModel):
+    root: list[ChatMessageGET]
 
 
 class ChatMessagePOST(BaseORMModel):
+    type: str
+    content: str
     id_chat_session: int
-    id_chat_account: int
-    message: str

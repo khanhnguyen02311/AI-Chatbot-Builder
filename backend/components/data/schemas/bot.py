@@ -11,6 +11,7 @@ class BotFULL(BaseORMModel):
     conf_model_temperature: float
     conf_model_name: str
     conf_instruction: str
+    conf_external_data: str | None
     time_created: datetime
     id_account: int
 
@@ -30,7 +31,7 @@ class ListBotGET(BaseListModel):
     root: list[BotGET]
 
 
-class BotPUT(BaseORMModel):
+class BotPOST(BaseORMModel):
     name: str = Field(max_length=64)
     description: str = Field(min_length=16)
     is_public: bool
@@ -39,5 +40,5 @@ class BotPUT(BaseORMModel):
     conf_instruction: str
 
 
-class BotPOST(BotPUT):
-    id_account: int | None = None
+class BotPUT(BotPOST):
+    pass

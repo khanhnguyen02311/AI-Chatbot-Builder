@@ -67,17 +67,7 @@ def _validate_hash(plain_password, hashed_password) -> bool:
 
 
 class AccountService:
-    """ Handle complex logic related to account, including authentication and authorization
-
-    - validate_token      (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME, return_type: str = "account"))
-    - validate_token_chat (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
-    - deactivate_token    (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
-    - renew_token         (cls, token: str = Depends(DEFAULT_OAUTH2_SCHEME))
-
-    - create_account_pair (self, data: AccountSchemas.AccountPOST) -> tuple[Any, Any]
-    - create_chat_account (self, data: ChatAccountSchemas.ChatAccountPOST) -> tuple[Any, Any]
-    - validate_account    (self, data: AccountSchemas.AccountLOGIN) -> tuple[Any, Any]
-    """
+    """ Handle complex logic related to account, including authentication and authorization"""
 
     def __init__(self, session):
         self.session = session
@@ -138,7 +128,7 @@ class AccountService:
                 account = AccountRepository(session=session).get(identifier=payload["sub"]["id"])
                 if account is None:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-                chat_account = ChatAccountRepository(session=session).get_by_account_type(account.id, "internal")
+                chat_account = ChatAccountRepository(session=session).get_by_account_type(account.id, PostgresModels.CONSTANTS.ChatAccount_account_type[0])
                 if chat_account is None:
                     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
                 account_tokens = {
@@ -155,7 +145,7 @@ class AccountService:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     def create_account_pair(self, data: AccountSchemas.AccountPOST) -> tuple[Any, Any]:
-        user_role = AccountRoleRepository(session=self.session).get_by_role(role="User")
+        user_role = AccountRoleRepository(session=self.session).get_by_role(role=PostgresModels.CONSTANTS.AccountRole_role[1])
         if user_role is None:
             return [], "Account role not found"
         account_query = select(PostgresModels.Account).where(
@@ -170,7 +160,7 @@ class AccountService:
                                              id_account_role=user_role.id)
         self.repository.create(new_account=new_account)
         # create chat account
-        new_chat_account = PostgresModels.ChatAccount(account_type="internal", id_internal_account=new_account.id)
+        new_chat_account = PostgresModels.ChatAccount(account_type=PostgresModels.CONSTANTS.ChatAccount_account_type[0], id_internal_account=new_account.id)
         ChatAccountRepository(session=self.session).create(new_chat_account)
         return [new_account, new_chat_account], None
 
@@ -180,7 +170,7 @@ class AccountService:
         return new_chat_account, None
 
     def validate_account(self, data: AccountSchemas.AccountLOGIN) -> tuple[Any, Any]:
-        user_role = AccountRoleRepository(session=self.session).get_by_role(role="User")
+        user_role = AccountRoleRepository(session=self.session).get_by_role(role=PostgresModels.CONSTANTS.AccountRole_role[1])
         account_query = select(PostgresModels.Account).where(
             and_(
                 or_(PostgresModels.Account.username == data.username_or_email, PostgresModels.Account.email == data.username_or_email),
@@ -188,7 +178,7 @@ class AccountService:
         account = self.session.scalars(account_query).first()
         if account is None or not _validate_hash(data.password, account.password):
             return None, "Wrong username or password"
-        chat_account = ChatAccountRepository(session=self.session).get_by_account_type(account.id, "internal")
+        chat_account = ChatAccountRepository(session=self.session).get_by_account_type(account.id, PostgresModels.CONSTANTS.ChatAccount_account_type[0])
         chat_account_id = chat_account.id if chat_account is not None else None
         account_tokens = {
             "access_token": _create_token(account.id, ACCESS_TOKEN_TYPE, chat_account_identifier=chat_account_id),
