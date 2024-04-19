@@ -1,13 +1,12 @@
 from datetime import datetime
-from typing import Annotated, Any
 from fastapi import Depends, HTTPException, status
 from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import chat_account as ChatAccountSchemas, chat_session as ChatSessionSchemas, chat_message as ChatMessageSchemas
-from components.repositories.account import AccountRepository
 from components.repositories.chat_account import ChatAccountRepository
 from components.repositories.chat_session import ChatSessionRepository
 from components.repositories.chat_message import ChatMessageRepository
+from components.repositories.bot import BotRepository
 
 
 class ChatService:
@@ -36,6 +35,10 @@ class ChatService:
 
         if session_data.name is None:
             session_data.name = "Session " + datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # check public / owned bot
+        bot = BotRepository(self.session).get(session_data.id_bot)
+        if bot is None or not (bot.is_public or bot.id_account == chat_account.id_internal_account):
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
         chat_session = PostgresModels.ChatSession(**session_data.model_dump(), id_chat_account=chat_account.id, human_reply=False)
         self.session.add(chat_session)
         self.session.flush()

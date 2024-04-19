@@ -75,12 +75,12 @@ New input: {input}
 
     def load_model(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 0.5, max_token: int = 3000):
         if model_name not in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo"]:
-            raise NotImplementedError("Model not supported for now.")
+            raise NotImplementedError("Model not supported for now. Currently supported: gpt-3.5-turbo-1106, gpt-3.5-turbo")
         self.llm = ChatOpenAI(model_name=model_name, temperature=temperature, max_tokens=max_token)
         self.agent = create_react_agent(llm=self.llm, tools=self.tools, prompt=self.prompt)
 
     def generate_response(self, user_input: str):
-        response = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=App.DEBUG, max_execution_time=8, max_iterations=10).invoke(
+        response = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=App.DEBUG, max_execution_time=15, max_iterations=10).invoke(
             {"input": user_input}, return_only_outputs=True)
         return response['output']
 

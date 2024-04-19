@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
 from components.data import POSTGRES_SESSION_FACTORY
 from components.data.models import postgres as PostgresModels
-from components.data.schemas import chat_session as ChatSessionSchemas, chat_message as ChatMessageSchemas
+from components.data.schemas import chat_session as ChatSessionSchemas, chat_message as ChatMessageSchemas, bot as BotSchemas
+from components.services.bot import BotService
 from components.services.account import AccountService
 from components.services.chat import ChatService
 
@@ -21,7 +21,16 @@ def new_chat_session(session_data: ChatSessionSchemas.ChatSessionPOST, chat_acco
     with POSTGRES_SESSION_FACTORY() as session:
         new_session = ChatService(session).create_new_chat_session(session_data, chat_account)
         session.commit()
-        return new_session
+        return ChatSessionSchemas.ChatSessionGET.model_validate(new_session)
+
+
+@router.get("/{session_id}")
+def get_chat_session(session_id: int, chat_account: PostgresModels.ChatAccount = Depends(AccountService.validate_token_chat)):
+    with POSTGRES_SESSION_FACTORY() as session:
+        chat_session = ChatService(session).validate_chat_account_session(session_id, chat_account)
+        bot = BotService(session).validate_accessible_bot(chat_session.id_bot, chat_account.id_internal_account)
+        return {"chat_session": ChatSessionSchemas.ChatSessionGET.model_validate(chat_session),
+                "bot": BotSchemas.BotGET.model_validate(bot)}
 
 
 @router.get("/{session_id}/messages")
