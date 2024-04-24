@@ -1,5 +1,7 @@
 from datetime import datetime
 from fastapi import Depends, HTTPException, status
+from langchain_core.messages.ai import AIMessage
+from langchain_core.messages.human import HumanMessage
 from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import chat_account as ChatAccountSchemas, chat_session as ChatSessionSchemas, chat_message as ChatMessageSchemas
@@ -14,6 +16,14 @@ class ChatService:
 
     def __init__(self, session):
         self.session = session
+
+    @staticmethod
+    def _convert_message_to_langchain_message(message: PostgresModels.ChatMessage):
+        if message.type in PostgresModels.CONSTANTS.ChatMessage_type[:3]:  # bot & admin message counted as AI
+            return AIMessage(content=message.content)
+        else:
+            return HumanMessage(content=message.content)
+        # else: raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid message type, must be one of {PostgresModels.CONSTANTS.ChatMessage_type}")
 
     def validate_chat_account_session(self, session_id: int, chat_account: PostgresModels.ChatAccount):
         """Validate if the session belongs to the chat account"""
@@ -49,19 +59,31 @@ class ChatService:
 
         return ChatSessionRepository(self.session).get_all_by_chat_account(chat_account.id)
 
-    def get_session_messages(self, session_id: int, chat_account: PostgresModels.ChatAccount):
+    def get_session_messages(self, session_id: int, chat_account: PostgresModels.ChatAccount, return_type: str = "model", with_validation: bool = True):
         """Get all messages of a chat session"""
 
-        self.validate_chat_account_session(session_id, chat_account)
-        return ChatMessageRepository(self.session).get_all_by_chat_session(session_id)
+        if with_validation:
+            self.validate_chat_account_session(session_id, chat_account)
+        messages = ChatMessageRepository(self.session).get_all_by_chat_session(session_id)
+        if return_type == "model":
+            return messages
+        elif return_type == "langchain":
+            langchain_messages = list(map(self._convert_message_to_langchain_message, messages))
+            return langchain_messages
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid return type")
 
-    def create_new_chat_message(self, message_data: ChatMessageSchemas.ChatMessagePOST, chat_account: PostgresModels.ChatAccount):
+    def create_new_chat_message(self, message_data: ChatMessageSchemas.ChatMessagePOST, chat_account: PostgresModels.ChatAccount, with_validation: bool = True):
         """Create a new chat message"""
 
-        self.validate_chat_account_session(message_data.id_chat_session, chat_account)
-        if message_data.type not in PostgresModels.CONSTANTS.ChatMessage_type:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid message type, must be one of [bot / bot-form / admin / user-text / user-options]")
-        chat_message = PostgresModels.ChatMessage(**message_data.model_dump())
+        if with_validation:
+            self.validate_chat_account_session(message_data.id_chat_session, chat_account)
+        if message_data.type in PostgresModels.CONSTANTS.ChatMessage_type[:2]:
+            chat_message = PostgresModels.ChatMessage(**message_data.model_dump(exclude_none=True))
+        elif message_data.type in PostgresModels.CONSTANTS.ChatMessage_type[2:]:
+            chat_message = PostgresModels.ChatMessage(**message_data.model_dump(exclude_none=True), id_chat_account=chat_account.id)
+        else:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid message type, must be one of {PostgresModels.CONSTANTS.ChatMessage_type}")
         self.session.add(chat_message)
         self.session.flush()
         return chat_message

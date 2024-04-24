@@ -5,6 +5,7 @@ from components.data.schemas import chat_session as ChatSessionSchemas, chat_mes
 from components.services.bot import BotService
 from components.services.account import AccountService
 from components.services.chat import ChatService
+from model_agents.agents.account import AccountAgent
 
 router = APIRouter(prefix="/sessions")
 
@@ -36,13 +37,31 @@ def get_chat_session(session_id: int, chat_account: PostgresModels.ChatAccount =
 @router.get("/{session_id}/messages")
 def get_session_messages(session_id: int, chat_account: PostgresModels.ChatAccount = Depends(AccountService.validate_token_chat)):
     with POSTGRES_SESSION_FACTORY() as session:
-        messages = ChatService(session).get_session_messages(session_id, chat_account)
+        messages = ChatService(session).get_session_messages(session_id, chat_account, return_type="model")
         return ChatMessageSchemas.ListChatMessageGET.model_validate(messages)
 
 
 @router.post("/{session_id}/messages")
-def new_chat_message(message_data: ChatMessageSchemas.ChatMessagePOST, chat_account: PostgresModels.ChatAccount = Depends(AccountService.validate_token_chat)):
+def new_chat_message(session_id: int, message_data: ChatMessageSchemas.ChatMessagePOST, chat_account: PostgresModels.ChatAccount = Depends(AccountService.validate_token_chat)):
     with POSTGRES_SESSION_FACTORY() as session:
-        new_message = ChatService(session).create_new_chat_message(message_data, chat_account)
+        chat_service = ChatService(session)
+        bot_service = BotService(session)
+        if message_data.id_chat_session is None or message_data.id_chat_session != session_id:
+            message_data.id_chat_session = session_id
+
+        chat_session = chat_service.validate_chat_account_session(session_id, chat_account)
+        bot = bot_service.validate_accessible_bot(chat_session.id_bot, chat_account.id_internal_account)
+        session_messages = chat_service.get_session_messages(session_id, chat_account, return_type="langchain", with_validation=False)
+        new_message = chat_service.create_new_chat_message(message_data, chat_account, with_validation=False)
+
+        print(session_messages)
+
+        response = AccountAgent(bot_data=bot, message_history=session_messages).generate_response(message_data.content)
+        new_bot_message = chat_service.create_new_chat_message(
+            ChatMessageSchemas.ChatMessagePOST(content=response, type="bot", id_chat_session=session_id),
+            chat_account,
+            with_validation=False)
+
         session.commit()
-        return ChatMessageSchemas.ChatMessageGET.model_validate(new_message)
+        return {"message": ChatMessageSchemas.ChatMessageGET.model_validate(new_message),
+                "response": ChatMessageSchemas.ChatMessageGET.model_validate(new_bot_message)}

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 from starlette.types import Receive, Scope, Send
-from fastapi import WebSocket
+from fastapi import WebSocket, WebSocketException, status
 from pydantic import BaseModel
 from components.data import REDIS_SESSION, POSTGRES_SESSION_FACTORY
 from components.data.models import postgres as PostgresModel
@@ -34,14 +34,17 @@ class CustomWebsocket(WebSocket):
 
 
 class WebsocketService:
+    connections_by_chat_account: dict[int, list[CustomWebsocket]]
+    connections_by_ws: dict[CustomWebsocket, PostgresModel.ChatAccount]
+
     def __init__(self):
-        self.connections_by_chat_account: dict[int, list[CustomWebsocket]] = {}
-        self.connections_by_ws: dict[CustomWebsocket, PostgresModel.ChatAccount] = {}
+        self.connections_by_chat_account = {}
+        self.connections_by_ws = {}
 
     @staticmethod
     def create_one_time_websocket_token(chat_account: PostgresModel.ChatAccount):
         token = uuid.uuid4().hex + uuid.uuid4().hex
-        REDIS_SESSION.setex(f"WS_token:{token}", 1, chat_account.id)
+        REDIS_SESSION.setex(f"WS_token:{token}", 60, str(chat_account.id))
         return {"token": token,
                 "type": "one-time"}
 
@@ -52,12 +55,17 @@ class WebsocketService:
             return None
         REDIS_SESSION.delete(f"WS_token:{token}")
         with POSTGRES_SESSION_FACTORY() as session:
-            chat_account = ChatAccountRepository(session).get(chat_account_id)
+            chat_account = ChatAccountRepository(session).get(int(chat_account_id))
             session.expunge_all()
             return chat_account
 
-    async def connect(self, ws: CustomWebsocket, chat_account: PostgresModel.ChatAccount):
+    async def connect(self, ws: CustomWebsocket, token: str):
+        chat_account = self.validate_one_time_websocket_token(token)
+        if chat_account is None:
+            raise WebSocketException(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid one-time token")
         await ws.accept()
+        if chat_account.id not in self.connections_by_chat_account:
+            self.connections_by_chat_account[chat_account.id] = []
         self.connections_by_chat_account[chat_account.id].append(ws)
         self.connections_by_ws[ws] = chat_account
 
@@ -74,6 +82,7 @@ class WebsocketService:
                 chat_service.create_new_chat_message(message_data, chat_account)
                 response = WebsocketMessage(type="success", data="Message sent")
                 await self.send_message(chat_account.id, response)
+                session.commit()
         except Exception as e:
             response = WebsocketMessage(type="error", data=str(e))
             await self.send_message(chat_account.id, response)

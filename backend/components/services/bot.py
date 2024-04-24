@@ -46,7 +46,7 @@ class BotService:
 
         new_bot = PostgresModels.Bot(**bot_data.model_dump(), id_account=account.id)
         try:
-            _ = AccountAgent(new_bot, None)
+            _ = AccountAgent(new_bot)
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         self.bot_repository.create(new_bot)
@@ -57,7 +57,7 @@ class BotService:
 
         self.validate_account_bot(bot_id, account.id)
         try:
-            _ = AccountAgent(PostgresModels.Bot(**new_data.model_dump(), id_account=account.id), None)
+            _ = AccountAgent(PostgresModels.Bot(**new_data.model_dump(), id_account=account.id))
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         updated_bot = self.bot_repository.update(bot_id, new_data)

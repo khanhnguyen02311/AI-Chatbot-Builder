@@ -23,7 +23,7 @@ str_array = Annotated[List[str], mapped_column(ARRAY(VARCHAR(64)))]
 class CONSTANTS:
     AccountRole_role = ['Admin', 'User']
     ChatAccount_account_type = ['internal', 'facebook', 'zalo']
-    ChatMessage_type = ['bot', 'bot-form', 'admin', 'user', 'user-options']
+    ChatMessage_type = ['bot', 'bot-form', 'admin', 'user-text', 'user-options']
 
 
 class Base(DeclarativeBase):

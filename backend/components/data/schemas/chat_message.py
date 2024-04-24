@@ -28,4 +28,4 @@ class ListChatMessageGET(BaseListModel):
 class ChatMessagePOST(BaseORMModel):
     type: str
     content: str
-    id_chat_session: int
+    id_chat_session: int | None = None
