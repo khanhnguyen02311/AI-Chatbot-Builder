@@ -1,8 +1,8 @@
 import { useRef } from 'react';
-import ChatHistoryItem from '../ChatHistoryItem/chathistoryitem';
+import ChatHistoryItem from '../00_ChatHistoryItem/chathistoryitem';
 import './chathistorylist.scss'
 
-function ChatHistoryList(){
+function ChatHistoryList() {
     const chats = [
         { id: 1, name: 'Chat 1' },
         { id: 2, name: 'Chat 2' },
@@ -15,10 +15,10 @@ function ChatHistoryList(){
         { id: 3, name: 'Chat 3' },
         { id: 2, name: 'Chat 2' },
         { id: 3, name: 'Chat 3' }
-      ];
+    ];
     return (
         <ul className='chat-list'>
-            {chats.map(chat => 
+            {chats.map(chat =>
                 <ChatHistoryItem key={chat.id} id={chat.id} name={chat.name} ></ChatHistoryItem>
             )}
         </ul>

@@ -1,7 +1,7 @@
 import './sidebar.scss';
-import NewChat from '../NewChat/newchat';
-import ChatHistoryList from '../ChatHistory/chathistorylist';
-import UserInfo from '../UserInfo/userinfo';
+import NewChat from '../00_NewChat/newchat';
+import ChatHistoryList from '../00_ChatHistory/chathistorylist';
+import UserInfo from '../00_UserInfo/userinfo';
 
 
 function SideBar() {

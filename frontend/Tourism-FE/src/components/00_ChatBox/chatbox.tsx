@@ -1,7 +1,7 @@
 import './chatbox.scss'
 
-function ChatBox () {
-    return(
+function ChatBox() {
+    return (
         <div>
 
         </div>
