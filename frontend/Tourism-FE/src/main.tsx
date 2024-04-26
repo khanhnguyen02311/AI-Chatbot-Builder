@@ -7,6 +7,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { ThemeProvider, createTheme } from '@mui/material';
 import HomePage from './pages/Home.tsx'
 import ChatPage from './pages/Chat.tsx';
+import ChatLayoutPage from './pages/ChatLayout.tsx';
 import ErrorPage from './pages/Error.tsx'
 import SignUpPage from './pages/SignUp.tsx';
 import SignInPage from './pages/SignIn.tsx';
@@ -29,6 +30,11 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
   },
   {
+    path: "/chat-layout",
+    element: <ChatLayoutPage />,
+    errorElement: <ErrorPage />,
+  },
+  {
     path: "/signup",
     element: <SignUpPage />,
     errorElement: <ErrorPage />,
@@ -38,10 +44,6 @@ const router = createBrowserRouter([
     element: <SignInPage />,
     errorElement: <ErrorPage />,
   },
-  {
-    path: "*",
-    element: <ErrorPage />,
-  }
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
