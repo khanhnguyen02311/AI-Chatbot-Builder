@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { AddCircle, Send } from "@mui/icons-material";
 import React from "react";
+import MessageBox from "../components/MessageBox";
 
 function TestHistoryItem() {
     return (
@@ -59,7 +60,7 @@ function ChatLayoutPage() {
                 </Card>
             </Box>
             <Box sx={{ flexGrow: 1, border: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
-                <Box sx={{ border: 1, width: '100%', height: '100px', display: 'flex', alignItems: 'center', justifyContent: 'stretch' }}>
+                <Box sx={{ border: 1, width: '100%', height: '100px', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'stretch' }}>
                     <Box sx={{ pl: 4, border: 1, flexGrow: 1, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'start', justifyContent: 'center' }}>
                         <Typography variant="body1">Conversation Name ABC</Typography>
                         <Typography variant="body2">Wednesday, 16th, 2024</Typography>
@@ -79,13 +80,32 @@ function ChatLayoutPage() {
                         </Select>
                     </FormControl>
                 </Box>
-                <Box sx={{ flexGrow: 1 }} />
-                <Container sx={{ border: 1 }}>
-                    <Typography variant="body1">Chat content</Typography>
-                    <Typography variant="body1">Chat content</Typography>
-                    <Typography variant="body1">Chat content</Typography>
-                    <Typography variant="body1">Chat content</Typography>
-                </Container>
+                <Box sx={{ flexGrow: 1, alignSelf: 'center', p: 6, gap: 2, width: '80%', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+                    <MessageBox content="Hello, how can I help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Can you send me some recommended things to do in Son Doong ?" sender="Me" align="right" />
+                    <MessageBox content="No, can't help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Oh, okay." sender="Me" align="right" />
+                    <MessageBox content="Hello, how can I help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Can you send me some recommended things to do in Son Doong ?" sender="Me" align="right" />
+                    <MessageBox content="No, can't help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Oh, okay." sender="Me" align="right" />
+                    <MessageBox content="Hello, how can I help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Can you send me some recommended things to do in Son Doong ?" sender="Me" align="right" />
+                    <MessageBox content="No, can't help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Oh, okay." sender="Me" align="right" />
+                    <MessageBox content="Hello, how can I help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Can you send me some recommended things to do in Son Doong ?" sender="Me" align="right" />
+                    <MessageBox content="No, can't help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Oh, okay." sender="Me" align="right" />
+                    <MessageBox content="Hello, how can I help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Can you send me some recommended things to do in Son Doong ?" sender="Me" align="right" />
+                    <MessageBox content="No, can't help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Oh, okay." sender="Me" align="right" />
+                    <MessageBox content="Hello, how can I help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Can you send me some recommended things to do in Son Doong ?" sender="Me" align="right" />
+                    <MessageBox content="No, can't help you" sender="QuangBinhTravisstant" align="left" />
+                    <MessageBox content="Oh, okay." sender="Me" align="right" />
+                </Box>
                 <Box sx={{ border: 1, p: 4, width: '100%', maxHeight: '400px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <TextField maxRows={8}
                         id="input-area"
