@@ -2,3 +2,5 @@
 .env.staging
 .env.prod
 note.txt
+
+deployments/env-secret.yaml
