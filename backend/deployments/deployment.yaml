@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-builder-be-deployment
+  labels:
+    app: chatbot-builder-be
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot-builder-be
+  template:
+    metadata:
+      labels:
+        app: chatbot-builder-be
+    spec:
+      containers:
+        - name: chatbot-builder-be
+          image: khanhnguyen02311/chatbot-builder:latest-release
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: env-secret

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-builder-be-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot-builder-be-postgres
+  template:
+    metadata:
+      labels:
+        app: chatbot-builder-be-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: 'postgres:15'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - secretRef:
+                name: env-secret
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: ps-data
+      volumes:
+        - name: ps-data
+          persistentVolumeClaim:
+            claimName: chatbot-builder-be-postgres-volume-claim

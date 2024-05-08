@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-builder-be-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot-builder-be-redis
+  template:
+    metadata:
+      labels:
+        app: chatbot-builder-be-redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:7
+          imagePullPolicy: IfNotPresent
+          command: [ "redis-server" ]
+          args:
+            - "--save"
+            - "120"
+            - "1"
+            - "--loglevel"
+            - "warning"
+            - "--requirepass"
+            - $(REDIS_PASSWORD)
+          envFrom:
+            - secretRef:
+                name: env-secret
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - mountPath: /redis-data
+              name: rd-data
+      volumes:
+        - name: rd-data
+          persistentVolumeClaim:
+            claimName: chatbot-builder-be-redis-volume-claim
