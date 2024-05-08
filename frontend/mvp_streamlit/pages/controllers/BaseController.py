@@ -1,9 +1,13 @@
+import os
 import requests
 import streamlit as st
 
 
 def _create_request(method: str, path: str, json_data, headers):
-    st.session_state.base_url = "http://localhost:8000"
+    if os.environ.get("BACKEND_BASE_URL") is None:
+        st.session_state.base_url = "http://localhost:8000"
+    else:
+        st.session_state.base_url = "http://" + os.environ.get("BACKEND_BASE_URL") + ":" + os.environ.get("BACKEND_PORT")
     method = method.upper()
     if method == "GET":
         resp = requests.get(st.session_state.base_url + path, headers=headers)

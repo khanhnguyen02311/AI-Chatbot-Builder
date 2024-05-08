@@ -17,6 +17,7 @@ spec:
       containers:
         - name: chatbot-builder-be
           image: khanhnguyen02311/chatbot-builder-be:latest-release
+          imagePullPolicy: Always
           ports:
             - containerPort: 8000
           envFrom:
@@ -43,5 +44,23 @@ spec:
       containers:
         - name: chatbot-builder-fe
           image: khanhnguyen02311/chatbot-builder-fe-mvp:latest-release
+          imagePullPolicy: Always
           ports:
             - containerPort: 8501
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+              scheme: HTTP
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+              scheme: HTTP
+            timeoutSeconds: 1
+          env:
+            - name: BACKEND_BASE_URL
+              value: chatbot-builder-be-service
+            - name: BACKEND_PORT
+              value: "8000"

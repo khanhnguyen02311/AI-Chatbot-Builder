@@ -1,9 +1,9 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: chatbot-builder-be-ingress
+  name: chatbot-builder-ingress
   labels:
-    name: chatbot-builder-be-ingress
+    name: chatbot-builder-ingress
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-issuer"
     nginx.ingress.kubernetes.io/rewrite-target: /$1
@@ -12,11 +12,18 @@ spec:
   tls:
     - hosts:
         - bot-touristant.duckdns.org
-      secretName: chatbot-builder-be-ayw744-tls
+      secretName: chatbot-builder-ayw744-tls
   rules:
     - host: bot-touristant.duckdns.org
       http:
         paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: chatbot-builder-fe-mvp-service
+                port:
+                  number: 8501
           - pathType: Prefix
             path: "/api/(.*)"
             backend:
