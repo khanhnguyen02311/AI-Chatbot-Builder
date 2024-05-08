@@ -8,7 +8,8 @@ def authenticated_menu():
     st.sidebar.page_link("Home.py", label="Home")
     # st.sidebar.page_link("pages/BotViewer.py", label="Bot Viewer")
     # st.sidebar.page_link("pages/BotEditor.py", label="Bot Editor")
-    st.sidebar.page_link("pages/BotTravelViewer.py", label="Travel Assistant")
+    st.sidebar.page_link("pages/BotTravelViewer.py", label="Chat với Bot (version cũ)")
+    st.sidebar.page_link("pages/ChatViewer.py", label="Chat với Bot (version mới)")
 
     st.sidebar.markdown(f"### Logged in as {st.session_state['logged_in_as']}")
     st.sidebar.button("Logout", on_click=AuthController.logout)

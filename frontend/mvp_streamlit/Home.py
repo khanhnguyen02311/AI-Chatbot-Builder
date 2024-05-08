@@ -3,6 +3,7 @@ from Menu import menu
 
 # -----------------------------------------------------------------------------
 # SESSION_STATE VARIABLES:
+# base_backend_url:         str:        the base URL of the backend
 # action_result_data:       [int, str]: the result of the last action (0: success, 1: warning, 2: error), empty if no action was performed
 # var_username_or_email:    str:        the username or email of the user, empty if not logged in
 # var_password:             str:        the password of the user, empty if not logged in
@@ -12,7 +13,7 @@ from Menu import menu
 # bots:                     {str, Any}: a map of bots, used for the bot viewer
 # -----------------------------------------------------------------------------
 
-st.action_result_data = None
+st.session_state.action_result_data = None
 
 if "logged_in_as" not in st.session_state or "access_token" not in st.session_state or "refresh_token" not in st.session_state:
     st.session_state["logged_in_as"] = ""
@@ -24,5 +25,6 @@ menu()
 # st.title("Chatbot Engine! 👋")
 # st.subheader("A place to build, test, and deploy chatbots for your specific needs.")
 
-st.title("Your Vietnamese travelling companion! 👋 ")
-st.subheader("A place to answer all of your questions about travel & tourism.")
+st.title("BotTouristant xin chào! 👋 ")
+st.divider()
+st.subheader("BotTouristant là một nền tảng hỗ trợ tham khảo các dịch vụ du lịch, cũng như giải đáp thắc mắc của khách du lịch sử dụng chatbot.")
