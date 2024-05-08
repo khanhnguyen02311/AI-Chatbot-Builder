@@ -16,9 +16,32 @@ spec:
     spec:
       containers:
         - name: chatbot-builder-be
-          image: khanhnguyen02311/chatbot-builder:latest-release
+          image: khanhnguyen02311/chatbot-builder-be:latest-release
           ports:
             - containerPort: 8000
           envFrom:
             - secretRef:
                 name: env-secret
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-builder-fe-mvp-deployment
+  labels:
+    app: chatbot-builder-fe-mvp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot-builder-fe-mvp
+  template:
+    metadata:
+      labels:
+        app: chatbot-builder-fe-mvp
+    spec:
+      containers:
+        - name: chatbot-builder-fe
+          image: khanhnguyen02311/chatbot-builder-fe-mvp:latest-release
+          ports:
+            - containerPort: 8501
