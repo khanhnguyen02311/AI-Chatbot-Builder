@@ -5,6 +5,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 // import './index.css'
 // import 'bootstrap/dist/css/bootstrap.css'
 import { ThemeProvider, createTheme } from '@mui/material';
+import AuthProvider from './context/AuthProvider.tsx'
 import HomePage from './pages/Home.tsx'
 import ChatPage from './pages/Chat.tsx';
 import ChatLayoutPage from './pages/ChatLayout.tsx';
@@ -50,7 +51,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </ThemeProvider>
   </React.StrictMode>,
 )

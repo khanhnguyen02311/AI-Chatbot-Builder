@@ -80,7 +80,7 @@ function ChatLayoutPage() {
                         </Select>
                     </FormControl>
                 </Box>
-                <Box sx={{ flexGrow: 1, alignSelf: 'center', p: 6, gap: 2, width: '80%', display: 'flex', flexDirection: 'column', overflow: 'auto' }}>
+                <Box sx={{ flexGrow: 1, alignSelf: 'center', px: '15%', py: 4, gap: 2, width: '100%', display: 'flex', flexDirection: 'column', overflowY: 'scroll' }}>
                     <MessageBox content="Hello, how can I help you" sender="QuangBinhTravisstant" align="left" />
                     <MessageBox content="Can you send me some recommended things to do in Son Doong ?" sender="Me" align="right" />
                     <MessageBox content="No, can't help you" sender="QuangBinhTravisstant" align="left" />

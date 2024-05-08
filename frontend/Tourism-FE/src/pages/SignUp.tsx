@@ -10,6 +10,7 @@ import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import axios from 'axios';
 
 // function Copyright(props: any) {
 //     return (
@@ -29,11 +30,24 @@ export default function SignUpPage() {
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
-            email: data.get('email'),
-            password: data.get('password'),
-        });
-    };
+        // console.log({
+        //     email: data.get('email'),
+        //     password: data.get('password'),
+        // });
+        try {
+            axios.post(`${import.meta.env.VITE_BACKEND_URL}/auth/signup`, {
+                'name': `${data.get('firstName')} ${data.get('lastName')}`,
+                'username': data.get('username'),
+                'email': data.get('email'),
+                'password': data.get('password')
+            }).then((response) => {
+                console.log(response);
+            })
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
 
     return (
         <Container component="main" maxWidth="xs">
@@ -72,6 +86,16 @@ export default function SignUpPage() {
                                 label="Last Name"
                                 name="lastName"
                                 autoComplete="family-name"
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                required
+                                fullWidth
+                                id="username"
+                                label="Username"
+                                name="username"
+                                autoComplete="username"
                             />
                         </Grid>
                         <Grid item xs={12}>
