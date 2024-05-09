@@ -25,7 +25,7 @@ def on_new_message():
         st.session_state["var_messages_TravelAssistant"].append({"content": "Sorry, I'm having trouble. Please try again.", "is_user": False})
 
     # reset input field
-    st.session_state["var_input_TravelAssistant"] = ""
+    # st.session_state["var_input_TravelAssistant"] = ""
 
 
 st.set_page_config(page_title="Travel Assistant", layout="wide")
@@ -53,5 +53,4 @@ with chat_placeholder.container():
 # Send user message to backend and display response
 
 
-with st.container():
-    st.text_input("Say something", key="var_input_TravelAssistant", on_change=on_new_message)
+st.chat_input("Say something", key="var_input_TravelAssistant", on_submit=on_new_message)

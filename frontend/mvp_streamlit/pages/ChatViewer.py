@@ -9,12 +9,14 @@ if "var_selected_session" not in st.session_state:
 
 st.set_page_config(page_title="Chat với Bot", layout="wide")
 
-st.title(f"💬 Session: {st.session_state.var_selected_session[0]['name'] if st.session_state.selected_session is not None else 'None'}")
-st.subheader(f"Bot: {st.session_state.var_selected_session[1]['name'] if st.session_state.selected_session is not None else 'None'}")
+st.title(f"💬 Session: {st.session_state.var_selected_session[0]['name'] if st.session_state.var_selected_session is not None else 'None'}")
+st.subheader(f"Bot: {st.session_state.var_selected_session[1]['name'] if st.session_state.var_selected_session is not None else 'None'}")
 menu_with_redirect()
 
-ChatController.load_bot_data()
-ChatController.load_session_history()
+if "var_public_bots" not in st.session_state:
+    ChatController.load_bot_data()
+if "var_sessions" not in st.session_state:
+    ChatController.load_session_history()
 
 st.sidebar.divider()
 
@@ -33,7 +35,7 @@ with st.sidebar.form("session_list_form"):
 
 st.sidebar.divider()
 
-st.sidebar.subheader("Lịch sử Chat")
+st.sidebar.subheader("Lịch sử Chat Session")
 
 # session history
 for session in st.session_state.var_sessions:
@@ -54,5 +56,4 @@ with chat_placeholder.container():
                 avatar_style="lorelei" if is_user else "bottts")
 
 # Send user message to backend and display response
-with st.container():
-    st.text_input("Hỏi bất kì điều gì", key="var_message_input", on_change=ChatController.send_message)
+st.chat_input("Hỏi bất kì điều gì", key="var_message_input", on_submit=ChatController.send_message)

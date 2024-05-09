@@ -3,6 +3,17 @@ import requests
 import streamlit as st
 
 
+def with_try_catch(func):
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            st.error(f"Error: {e}")
+            return None
+
+    return wrapper
+
+
 def _create_request(method: str, path: str, json_data, headers):
     if os.environ.get("BACKEND_BASE_URL") is None:
         st.session_state.base_url = "http://localhost:8000"

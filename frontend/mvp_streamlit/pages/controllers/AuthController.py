@@ -17,6 +17,7 @@ def save_credentials(username, access_token, refresh_token):
     # BotEditorController.init_testdata(st.session_state)
 
 
+@BaseController.with_try_catch
 def login():
     # if st.session_state.var_username_or_email == "admin" and st.session_state.var_password == "admin":
     #     save_credentials(st.session_state.var_username_or_email, "access_token_temp", "refresh_token_temp")
@@ -39,12 +40,13 @@ def login():
     if resp.status_code != 200:
         st.sidebar.error("Failed to log in. Please try again.")
         return
-    
+
     save_credentials(st.session_state.var_username_or_email, resp.json()["access_token"], resp.json()["refresh_token"])
     st.session_state.action_result_data = [0, "Logged in successfully!"]
     st.switch_page("Home.py")
 
 
+@BaseController.with_try_catch
 def signup():
     # if st.session_state.var_username == "admin" and st.session_state.var_password == "admin":
     #     save_credentials(st.session_state.var_username, "access_token_temp", "refresh_token_temp")
