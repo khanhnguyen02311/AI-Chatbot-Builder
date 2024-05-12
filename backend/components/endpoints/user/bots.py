@@ -31,7 +31,7 @@ def create_bot(data: BotSchemas.BotPOST, account: Account = Depends(AccountServi
 def get_bot(bot_id: int, account: Account = Depends(AccountService.validate_token)):
     with POSTGRES_SESSION_FACTORY() as session:
         bot_service = BotService(session=session)
-        bot = bot_service.validate_account_bot(bot_id, account)
+        bot = bot_service.validate_account_bot(bot_id, account.id)
         if bot is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
         return BotSchemas.BotFULL.model_validate(bot)

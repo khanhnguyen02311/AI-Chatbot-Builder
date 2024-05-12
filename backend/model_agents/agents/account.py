@@ -36,7 +36,7 @@ class AccountAgent(ChatAgentBase, ABC):
         template = """You are Assistant, a large language model trained by OpenAI. """ + prompt + """
 TOOLS:
 ------
-Assistant has access to the following tools to use in the thinking process:
+Assistant has access to these following tools to use in the thinking process:
 
 {tools}
 

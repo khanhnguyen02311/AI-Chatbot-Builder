@@ -53,15 +53,16 @@ def new_chat_message(session_id: int, message_data: ChatMessageSchemas.ChatMessa
         bot_service = BotService(session)
         chat_session = chat_service.validate_chat_account_session(session_id, chat_account)
         bot = bot_service.validate_accessible_bot(chat_session.id_bot, chat_account.id_internal_account)
-        session_messages = chat_service.get_session_messages(session_id, chat_account, return_type="langchain", with_validation=False)
-        new_message = chat_service.create_new_chat_message(message_data, chat_account, with_validation=False)
 
-        response = AccountAgent(bot_data=bot, message_history=session_messages).generate_response(message_data.content)
-        new_bot_message = chat_service.create_new_chat_message(
-            ChatMessageSchemas.ChatMessagePOST(content=response, type="bot", id_chat_session=session_id),
+        session_message_history = chat_service.get_session_messages(session_id, chat_account, return_type="langchain", with_validation=False)
+        agent_response = AccountAgent(bot_data=bot, message_history=session_message_history).generate_response(message_data.content)
+
+        new_message = chat_service.create_new_chat_message(message_data, chat_account, with_validation=False)
+        new_response_message = chat_service.create_new_chat_message(
+            ChatMessageSchemas.ChatMessagePOST(content=agent_response, type="bot", id_chat_session=session_id),
             chat_account,
             with_validation=False)
         session.commit()
 
         return {"message": ChatMessageSchemas.ChatMessageGET.model_validate(new_message),
-                "response": ChatMessageSchemas.ChatMessageGET.model_validate(new_bot_message)}
+                "response": ChatMessageSchemas.ChatMessageGET.model_validate(new_response_message)}

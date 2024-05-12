@@ -1,6 +1,5 @@
 import os
 from abc import ABC
-
 import langchain
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate

@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get("/one-time-token")
 def get_one_time_token(chat_account: PostgresModels.ChatAccount = Depends(AccountService.validate_token_chat)):
-    return WebsocketService.create_one_time_websocket_token(chat_account)
+    return WEBSOCKET_SERVICE_SESSION.create_one_time_websocket_token(chat_account)
 
 
 # @router.get("")

@@ -35,7 +35,7 @@ super_hub.include_router(logout.router, prefix="/auth", tags=["Auth"])
 super_hub.include_router(signup.router, prefix="/auth", tags=["Auth"])
 super_hub.include_router(token.router, prefix="/auth", tags=["Auth"])
 
-super_hub.include_router(legacy.router, prefix="/model", tags=["Model"])
+# super_hub.include_router(legacy.router, prefix="/model", tags=["Model"])
 
 super_hub.include_router(information.router, prefix="/user", tags=["User Information"])
 super_hub.include_router(businesses.router, prefix="/user", tags=["User Business"])
