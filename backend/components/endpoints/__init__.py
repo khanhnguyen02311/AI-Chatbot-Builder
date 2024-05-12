@@ -16,7 +16,7 @@ tags_metadata = [
     {"name": "User Bot", "description": "Operations with user bots"},
     {"name": "Model", "description": "Operations with AI models & agents"},
     {"name": "Public", "description": "Publicly available information / utilities"},
-    {"name": "Webhook", "description": "Operations with webhook endpoints, used by other platforms / services"},
+    {"name": "Webhook", "description": "Operations with webhook endpoints, used / called by other API services"},
     {"name": "Chat", "description": "Operations with chat sessions, messages & interactions"},
     {"name": "Websocket", "description": "Operations with websocket connection & authentication"},
     {"name": "Others"}
