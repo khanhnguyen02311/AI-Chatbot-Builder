@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -50,7 +50,7 @@ jobs:
           context: ./backend
           file: ./backend/Dockerfile-staging
           push: true
-          tags: user/chatbot-builder-be:latest-release
+          tags: ${{ secrets.DOCKER_USERNAME }}/chatbot-builder-be:latest-release
 
       - name: Build and push MVP frontend
         uses: docker/build-push-action@v5.3.0
@@ -58,4 +58,4 @@ jobs:
           context: ./frontend/mvp_streamlit
           file: ./frontend/mvp_streamlit/Dockerfile-staging
           push: true
-          tags: user/chatbot-builder-fe-mvp:latest-release
+          tags: ${{ secrets.DOCKER_USERNAME }}/chatbot-builder-fe-mvp:latest-release
