@@ -1,5 +1,5 @@
 import uuid
-from datetime import timedelta, datetime
+from datetime import timezone, datetime, timedelta
 from typing import Any
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -33,7 +33,7 @@ class Token(BaseModel):
 def _create_token(account_identifier: int, token_type: str, chat_account_identifier: int | None = None) -> str:
     """Return the token based on the subject (account)"""
 
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     to_encode = {"iat": now, "sub": Token(id=account_identifier, chat_id=chat_account_identifier, type=token_type).model_dump()}
     if token_type == "access":
         to_encode["exp"] = now + timedelta(minutes=Security.JWT_ACCESS_TOKEN_EXPIRE_MINUTES)

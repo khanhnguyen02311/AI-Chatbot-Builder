@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class ChatAgentBase(ABC):
+class Agent(ABC):
     @abstractmethod
     def load_prompt_template(self, *args, **kwargs):
         print("Load prompt template method not implemented")

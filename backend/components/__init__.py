@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from configurations.arguments import APP_STAGE, APP_DEBUG
 from .endpoints import super_hub, tags_metadata
 from . import data
 
@@ -12,8 +13,8 @@ async def lifespan(app: FastAPI):
     # Clean up
 
 
-def serve_api(stage: str, debug: bool):
-    app = FastAPI(lifespan=lifespan, debug=debug, openapi_tags=tags_metadata, redoc_url=None)
+def serve_api():
+    app = FastAPI(lifespan=lifespan, debug=APP_DEBUG, openapi_tags=tags_metadata, redoc_url=None)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],  # your frontend urls
@@ -22,5 +23,5 @@ def serve_api(stage: str, debug: bool):
         allow_headers=["*"]
     )
     app.include_router(super_hub)
-    # if stage in ['staging', 'prod']:
+    # if APP_STAGE in ['staging', 'prod']:
     return app

@@ -1,14 +1,12 @@
+import os
 from os import environ
-from .arguments import parse_args
+from dotenv import load_dotenv
+from .arguments import APP_STAGE
 
-# load command-line arguments before initializing the configuration classes
-args = parse_args()
-
-
-class App:
-    API_PORT = int(environ.get("APP_API_PORT"))
-    DEBUG = args.debug
-    STAGE = args.stage
+if environ.get("POSTGRES_HOST") is None:  # local environment needs to load .env file manually
+    exist_loaded_env = load_dotenv(dotenv_path=f'{os.path.dirname(__file__)}/../.env.{APP_STAGE}', verbose=True)
+    if not exist_loaded_env:
+        raise FileNotFoundError(f"Cannot find .env.{APP_STAGE} file. If you are running in local environment, please create one using the .env.example file as reference.")
 
 
 class Security:
@@ -35,7 +33,7 @@ class Redis:
 
 
 class SQLAlchemy:
-    ECHO = True
+    # ECHO = True
     AUTO_FLUSH = True  # flush after committing
     AUTO_COMMIT = False
     POOL_SIZE = 15

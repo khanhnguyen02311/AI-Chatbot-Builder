@@ -2,6 +2,7 @@ import redis
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import postgres as PostgresModels
+from configurations.arguments import APP_DEBUG
 from configurations.envs import Postgres, SQLAlchemy, Redis
 
 
@@ -29,7 +30,8 @@ def setup_default_data(postgres_session_factory: sessionmaker):
 
 # For PostgresSQL
 POSTGRES_ENGINE = create_engine(url=Postgres.URL,
-                                echo=SQLAlchemy.ECHO,
+                                echo=APP_DEBUG,
+                                hide_parameters=not APP_DEBUG,
                                 pool_size=SQLAlchemy.POOL_SIZE,
                                 max_overflow=SQLAlchemy.MAX_OVERFLOW,
                                 pool_pre_ping=SQLAlchemy.POOL_PRE_PING)

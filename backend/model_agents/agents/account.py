@@ -1,7 +1,5 @@
-import os
 from abc import ABC
-from configurations.envs import App
-import langchain
+from configurations.arguments import APP_STAGE, APP_DEBUG
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_community.callbacks import get_openai_callback
@@ -10,12 +8,12 @@ from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.messages.base import BaseMessage
 from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.human import HumanMessage
-from . import ChatAgentBase
+from . import Agent
 from model_agents.tools import get_tools_by_names
 from components.data.models import postgres as PostgresModels
 
 
-class AccountAgent(ChatAgentBase, ABC):
+class AccountAgent(Agent, ABC):
     def __init__(self, bot_data: PostgresModels.Bot, message_history: list[BaseMessage] = None):
         self.prompt = None
         self.tools = []
@@ -25,7 +23,7 @@ class AccountAgent(ChatAgentBase, ABC):
         self.agent_chain = None
 
         self.load_prompt_template(bot_data.conf_instruction)
-        self.load_tools(["google_search", "weather_search"])
+        self.load_tools(["search_google", "search_weather"])
         if bot_data.conf_external_data is not None:
             self.load_external_data(bot_data.conf_external_data)
         self.load_model(bot_data.conf_model_name, bot_data.conf_model_temperature, 3000)
@@ -84,7 +82,7 @@ New input: {input}
         self.agent = create_react_agent(llm=self.llm, tools=self.tools, prompt=self.prompt)
 
     def load_chain(self):
-        self.agent_chain = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=App.DEBUG, max_execution_time=15, max_iterations=10)
+        self.agent_chain = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=APP_DEBUG, max_execution_time=15, max_iterations=10)
 
     def generate_response(self, user_input: str):
         response = self.agent_chain.invoke({"input": user_input}, return_only_outputs=True)

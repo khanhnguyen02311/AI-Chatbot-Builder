@@ -1,17 +1,16 @@
 import os
 from abc import ABC
-from configurations.envs import App
-import langchain
+from configurations.arguments import APP_DEBUG
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_community.callbacks import get_openai_callback
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents import AgentExecutor, create_react_agent
-from . import ChatAgentBase
+from . import Agent
 from model_agents.tools import get_tools_by_names
 
 
-class TravelAgent(ChatAgentBase, ABC):
+class TravelAgent(Agent, ABC):
     def __init__(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 0.5, max_tokens: int = 2048):
         self.prompt = None
         self.tools = []
@@ -21,7 +20,7 @@ class TravelAgent(ChatAgentBase, ABC):
         self.memory = None
 
         self.load_prompt_template("temp")
-        self.load_tools(["google_search", "weather_search"])
+        self.load_tools(["search_google", "search_weather"])
         self.load_model(model_name, temperature, max_tokens)
         self.load_conversation()
         # self.memory = CombinedMemory(memories=[self.summary_memory, self.conversation_memory], input_key="input")
@@ -74,7 +73,7 @@ New input: {input}
     def load_conversation(self):
         # load messages from database, for later
         self.memory = ConversationBufferWindowMemory(memory_key="conversation_history", input_key="input", ai_prefix="Assistant", k=4)
-        self.agent_chain = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=App.DEBUG, max_execution_time=8, max_iterations=10)
+        self.agent_chain = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=APP_DEBUG, max_execution_time=8, max_iterations=10)
 
     def generate_response(self, user_input: str):
         response = self.agent_chain.invoke({"input": user_input}, return_only_outputs=True)
