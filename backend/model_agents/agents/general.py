@@ -6,11 +6,11 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_community.callbacks import get_openai_callback
 from langchain.memory import ConversationBufferWindowMemory, CombinedMemory, ConversationSummaryMemory
-from . import ChatAgentBase
+from . import Agent
 from model_agents.data.schemas import chat as ChatSchemas
 
 
-class GeneralAgent(ChatAgentBase, ABC):
+class GeneralAgent(Agent, ABC):
     def __init__(self, model_name: str = "gpt-3.5-turbo-1106", temperature: float = 1, max_tokens: int = 2048):
         if model_name not in ["gpt-3.5-turbo-1106", "gpt-3.5-turbo"]:
             raise NotImplementedError("Model not supported for now.")
