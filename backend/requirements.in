@@ -17,3 +17,4 @@ langchain-openai
 langchain-community
 google-api-python-client
 pyowm
+qdrant-client

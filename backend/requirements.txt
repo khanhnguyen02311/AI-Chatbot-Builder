@@ -72,18 +72,32 @@ googleapis-common-protos==1.63.0
     # via google-api-core
 greenlet==3.0.3
     # via sqlalchemy
+grpcio==1.64.0
+    # via
+    #   grpcio-tools
+    #   qdrant-client
+grpcio-tools==1.62.2
+    # via qdrant-client
 h11==0.14.0
     # via
     #   httpcore
     #   uvicorn
+h2==4.1.0
+    # via httpx
+hpack==4.0.0
+    # via h2
 httpcore==1.0.2
     # via httpx
 httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-httpx==0.26.0
-    # via openai
+httpx[http2]==0.26.0
+    # via
+    #   openai
+    #   qdrant-client
+hyperframe==6.0.1
+    # via h2
 idna==3.6
     # via
     #   anyio
@@ -133,6 +147,7 @@ numpy==1.26.3
     #   langchain
     #   langchain-community
     #   langchain-openai
+    #   qdrant-client
 openai==1.8.0
     # via langchain-openai
 packaging==23.2
@@ -144,12 +159,15 @@ passlib==1.7.4
     # via -r requirements.in
 pluggy==1.4.0
     # via pytest
+portalocker==2.8.2
+    # via qdrant-client
 proto-plus==1.23.0
     # via google-api-core
 protobuf==4.25.3
     # via
     #   google-api-core
     #   googleapis-common-protos
+    #   grpcio-tools
     #   proto-plus
 psycopg2-binary==2.9.9
     # via -r requirements.in
@@ -169,6 +187,7 @@ pydantic==2.5.3
     #   langchain-core
     #   langsmith
     #   openai
+    #   qdrant-client
 pydantic-core==2.14.6
     # via pydantic
 pyowm==3.3.0
@@ -192,6 +211,8 @@ pyyaml==6.0.1
     #   langchain
     #   langchain-community
     #   langchain-core
+qdrant-client==1.9.1
+    # via -r requirements.in
 redis==5.0.3
     # via -r requirements.in
 regex==2023.12.25
@@ -250,10 +271,15 @@ typing-inspect==0.9.0
 uritemplate==4.1.1
     # via google-api-python-client
 urllib3==2.1.0
-    # via requests
+    # via
+    #   qdrant-client
+    #   requests
 uvicorn==0.29.0
     # via -r requirements.in
 wheel==0.42.0
     # via -r requirements.in
 yarl==1.9.4
     # via aiohttp
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools
