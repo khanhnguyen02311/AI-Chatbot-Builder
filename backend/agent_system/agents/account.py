@@ -1,5 +1,4 @@
 from abc import ABC
-from configurations.arguments import APP_STAGE, APP_DEBUG
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_community.callbacks import get_openai_callback
@@ -8,6 +7,7 @@ from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.messages.base import BaseMessage
 from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.human import HumanMessage
+from configurations.arguments import APP_STAGE, APP_DEBUG
 from . import Agent
 from model_agents.tools import get_tools_by_names
 from components.data.models import postgres as PostgresModels
