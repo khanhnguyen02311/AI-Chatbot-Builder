@@ -7,7 +7,7 @@ from langchain_community.callbacks import get_openai_callback
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents import AgentExecutor, create_react_agent
 from . import Agent
-from model_agents.tools import get_tools_by_names
+from agent_system.tools import get_tools_by_names
 
 
 class TravelAgent(Agent, ABC):

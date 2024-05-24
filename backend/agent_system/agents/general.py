@@ -7,7 +7,7 @@ from langchain.chains import LLMChain
 from langchain_community.callbacks import get_openai_callback
 from langchain.memory import ConversationBufferWindowMemory, CombinedMemory, ConversationSummaryMemory
 from . import Agent
-from model_agents.data.schemas import chat as ChatSchemas
+from agent_system.data.schemas import chat as ChatSchemas
 
 
 class GeneralAgent(Agent, ABC):

@@ -9,7 +9,7 @@ from langchain_core.messages.ai import AIMessage
 from langchain_core.messages.human import HumanMessage
 from configurations.arguments import APP_STAGE, APP_DEBUG
 from . import Agent
-from model_agents.tools import get_tools_by_names
+from agent_system.tools import get_tools_by_names
 from components.data.models import postgres as PostgresModels
 
 

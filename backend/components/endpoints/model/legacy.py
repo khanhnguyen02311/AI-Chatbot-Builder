@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-from model_agents.data.schemas.chat import ChatTemplate
-from model_agents.agents.general import GeneralAgent
-from model_agents.agents.travel import TravelAgent
+from agent_system.data.schemas.chat import ChatTemplate
+from agent_system.agents.general import GeneralAgent
+from agent_system.agents.travel import TravelAgent
 from pydantic import BaseModel
 
 legacy_temp_id = 0

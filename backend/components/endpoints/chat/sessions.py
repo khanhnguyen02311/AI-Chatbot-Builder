@@ -5,7 +5,7 @@ from components.data.schemas import chat_session as ChatSessionSchemas, chat_mes
 from components.services.bot import BotService
 from components.services.account import AccountService
 from components.services.chat import ChatService
-from model_agents.agents.account import AccountAgent
+from agent_system.agents.account import AccountAgent
 
 router = APIRouter(prefix="/sessions")
 

@@ -9,7 +9,7 @@ from components.data.models import postgres as PostgresModel
 from components.data.schemas import chat_message as ChatMessageSchemas
 from components.repositories.chat_account import ChatAccountRepository
 from components.services.chat import ChatService
-from model_agents.agents.account import AccountAgent
+from agent_system.agents.account import AccountAgent
 
 
 class CONSTANTS:

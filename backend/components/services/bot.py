@@ -5,7 +5,7 @@ from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import bot as BotSchemas
 from components.repositories.bot import BotRepository
-from model_agents.agents.account import AccountAgent
+from agent_system.agents.account import AccountAgent
 
 
 class BotService:
