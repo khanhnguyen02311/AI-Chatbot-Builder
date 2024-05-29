@@ -48,3 +48,4 @@ setup_default_data(POSTGRES_SESSION_FACTORY)
 # For Redis
 REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, password=Redis.PASSWORD)
 REDIS_SESSION.flushdb()
+

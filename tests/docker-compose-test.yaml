@@ -1,0 +1,8 @@
+
+
+services:
+  db-chrome:
+    image: chromadb/chroma:latest
+    restart: no
+    ports:
+      - 9000:8000
