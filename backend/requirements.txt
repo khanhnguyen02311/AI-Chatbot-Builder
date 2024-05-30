@@ -206,6 +206,8 @@ python-dotenv==1.0.0
     # via -r requirements.in
 python-jose==3.3.0
     # via -r requirements.in
+python-multipart==0.0.9
+    # via -r requirements.in
 pyyaml==6.0.1
     # via
     #   langchain

@@ -158,6 +158,16 @@ class Bot(Base):
 #     id: Mapped[int_PK]
 #     name: Mapped[str64]
 
+class BotContext(Base):
+    """Store bot context information \n"""
+
+    __tablename__ = 'bot_context'
+    id: Mapped[int_PK]
+    filename: Mapped[str64]
+    time_created: Mapped[timestamp]
+
+    id_bot: Mapped[int] = Column(INTEGER, ForeignKey('bot.id'))
+
 
 class Scenario(Base):
     """Store chat process information \n

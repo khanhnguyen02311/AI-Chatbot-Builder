@@ -54,4 +54,5 @@ class AccountRepository(BaseRepository, ABC):
         delete_query = delete(PostgresModels.Account).where(PostgresModels.Account.id == identifier)
         self.session.execute(delete_query)
         self.session.flush()
-        return object
+        ## fix deletion returning
+        # return object

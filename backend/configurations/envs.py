@@ -8,6 +8,9 @@ if environ.get("POSTGRES_HOST") is None:  # local environment needs to load .env
     if not exist_loaded_env:
         raise FileNotFoundError(f"Cannot find .env.{APP_STAGE} file. If you are running in local environment, please create one using the .env.example file as reference.")
 
+if not os.path.exists(f"{os.path.dirname(__file__)}/../etc/userdata"):
+    os.makedirs(f"{os.path.dirname(__file__)}/../etc/userdata")
+
 
 class Security:
     JWT_SECRET_KEY = environ.get("SECURITY_JWT_SECRET_KEY")
@@ -47,6 +50,8 @@ class ChatModels:
     GOOGLE_API_KEY = environ.get("GOOGLE_API_KEY")
     GOOGLE_CSE_ID = environ.get("GOOGLE_CSE_ID")
     OPENWEATHERMAP_API_KEY = environ.get("OPENWEATHERMAP_API_KEY")
+
+    BOT_CONTEXT_LOCATION = f"{os.path.dirname(__file__)}/../etc/userdata"
 
 
 class Chat:

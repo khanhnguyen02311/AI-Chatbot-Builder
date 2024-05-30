@@ -11,10 +11,10 @@ spec:
   ingressClassName: nginx
   tls:
     - hosts:
-        - bot-touristant.duckdns.org
+        - bot-touristant.knguyen66.dynv6.net
       secretName: chatbot-builder-ayw744-tls
   rules:
-    - host: bot-touristant.duckdns.org
+    - host: bot-touristant.knguyen66.dynv6.net
       http:
         paths:
           - pathType: Prefix
@@ -24,6 +24,7 @@ spec:
                 name: chatbot-builder-fe-mvp-service
                 port:
                   number: 8501
+                  
           - pathType: Prefix
             path: "/api/(.*)"
             backend:

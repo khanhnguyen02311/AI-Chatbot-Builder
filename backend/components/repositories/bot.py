@@ -11,8 +11,8 @@ class BotRepository(BaseRepository, ABC):
 
     def get(self, identifier: int):
         query = select(PostgresModels.Bot).filter(PostgresModels.Bot.id == identifier)
-        bots = self.session.scalar(query)
-        return bots
+        bot = self.session.scalar(query)
+        return bot
 
     def get_all_by_account(self, identifier_account: int):
         query = select(PostgresModels.Bot).filter(PostgresModels.Bot.id_account == identifier_account)
@@ -35,7 +35,7 @@ class BotRepository(BaseRepository, ABC):
         return new_bot_data
 
     def delete(self, identifier: int):
-        delete_query = delete(PostgresModels.Bot).where(PostgresModels.Bot.id == identifier)
-        self.session.execute(delete_query)
+        delete_query = delete(PostgresModels.Bot).returning(PostgresModels.Bot).where(PostgresModels.Bot.id == identifier)
+        deleted_bot = self.session.scalar(delete_query)
         self.session.flush()
-        return object
+        return deleted_bot

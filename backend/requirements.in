@@ -18,3 +18,4 @@ langchain-community
 google-api-python-client
 pyowm
 qdrant-client
+python-multipart
