@@ -19,3 +19,5 @@ google-api-python-client
 pyowm
 qdrant-client
 python-multipart
+pymupdf
+python-docx

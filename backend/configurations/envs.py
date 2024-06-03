@@ -12,6 +12,17 @@ if not os.path.exists(f"{os.path.dirname(__file__)}/../etc/userdata"):
     os.makedirs(f"{os.path.dirname(__file__)}/../etc/userdata")
 
 
+class General:
+    BOT_CONTEXT_FILE_LOCATION = f"{os.path.dirname(__file__)}/../etc/userdata"
+    BOT_CONTEXT_ALLOWED_MIME_TYPES = [
+        "text/plain",
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/doc",
+        "application/ms-doc",
+        "application/msword"]
+
+
 class Security:
     JWT_SECRET_KEY = environ.get("SECURITY_JWT_SECRET_KEY")
     JWT_ALGORITHM = "HS256"
@@ -50,8 +61,6 @@ class ChatModels:
     GOOGLE_API_KEY = environ.get("GOOGLE_API_KEY")
     GOOGLE_CSE_ID = environ.get("GOOGLE_CSE_ID")
     OPENWEATHERMAP_API_KEY = environ.get("OPENWEATHERMAP_API_KEY")
-
-    BOT_CONTEXT_LOCATION = f"{os.path.dirname(__file__)}/../etc/userdata"
 
 
 class Chat:

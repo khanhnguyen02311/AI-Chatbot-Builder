@@ -4,7 +4,7 @@
 #
 #    pip-compile
 #
-aiohttp==3.9.1
+aiohttp==3.9.5
     # via
     #   langchain
     #   langchain-community
@@ -12,21 +12,21 @@ aiosignal==1.3.1
     # via aiohttp
 alembic==1.13.1
     # via -r requirements.in
-annotated-types==0.6.0
+annotated-types==0.7.0
     # via pydantic
-anyio==4.2.0
+anyio==4.4.0
     # via
     #   httpx
-    #   langchain-core
     #   openai
     #   starlette
+    #   watchfiles
 attrs==23.2.0
     # via aiohttp
 authlib==1.3.0
     # via -r requirements.in
 cachetools==5.3.3
     # via google-auth
-certifi==2023.11.17
+certifi==2024.6.2
     # via
     #   httpcore
     #   httpx
@@ -36,30 +36,36 @@ cffi==1.16.0
 charset-normalizer==3.3.2
     # via requests
 click==8.1.7
-    # via uvicorn
-cryptography==41.0.7
-    # via authlib
-dataclasses-json==0.6.3
     # via
-    #   langchain
-    #   langchain-community
+    #   typer
+    #   uvicorn
+cryptography==42.0.7
+    # via authlib
+dataclasses-json==0.6.6
+    # via langchain-community
 distro==1.9.0
     # via openai
+dnspython==2.6.1
+    # via email-validator
 ecdsa==0.19.0
     # via python-jose
-faker==22.2.0
+email-validator==2.1.1
+    # via fastapi
+faker==25.3.0
     # via -r requirements.in
-fastapi==0.109.0
+fastapi==0.111.0
     # via -r requirements.in
+fastapi-cli==0.0.4
+    # via fastapi
 frozenlist==1.4.1
     # via
     #   aiohttp
     #   aiosignal
 geojson==2.5.0
     # via pyowm
-google-api-core==2.18.0
+google-api-core==2.19.0
     # via google-api-python-client
-google-api-python-client==2.125.0
+google-api-python-client==2.131.0
     # via -r requirements.in
 google-auth==2.29.0
     # via
@@ -86,70 +92,88 @@ h2==4.1.0
     # via httpx
 hpack==4.0.0
     # via h2
-httpcore==1.0.2
+httpcore==1.0.5
     # via httpx
 httplib2==0.22.0
     # via
     #   google-api-python-client
     #   google-auth-httplib2
-httpx[http2]==0.26.0
+httptools==0.6.1
+    # via uvicorn
+httpx[http2]==0.27.0
     # via
+    #   fastapi
     #   openai
     #   qdrant-client
 hyperframe==6.0.1
     # via h2
-idna==3.6
+idna==3.7
     # via
     #   anyio
+    #   email-validator
     #   httpx
     #   requests
     #   yarl
 iniconfig==2.0.0
     # via pytest
+jinja2==3.1.4
+    # via fastapi
 jsonpatch==1.33
-    # via
-    #   langchain
-    #   langchain-core
+    # via langchain-core
 jsonpointer==2.4
     # via jsonpatch
-langchain==0.1.1
-    # via -r requirements.in
-langchain-community==0.0.13
+langchain==0.2.1
     # via
     #   -r requirements.in
-    #   langchain
-langchain-core==0.1.12
+    #   langchain-community
+langchain-community==0.2.1
+    # via -r requirements.in
+langchain-core==0.2.3
     # via
     #   langchain
     #   langchain-community
     #   langchain-openai
-langchain-openai==0.0.2.post1
+    #   langchain-text-splitters
+langchain-openai==0.1.8
     # via -r requirements.in
-langsmith==0.0.82
+langchain-text-splitters==0.2.0
+    # via langchain
+langsmith==0.1.67
     # via
     #   langchain
     #   langchain-community
     #   langchain-core
-mako==1.3.2
+lxml==5.2.2
+    # via python-docx
+mako==1.3.5
     # via alembic
-markupsafe==2.1.4
-    # via mako
-marshmallow==3.20.2
+markdown-it-py==3.0.0
+    # via rich
+markupsafe==2.1.5
+    # via
+    #   jinja2
+    #   mako
+marshmallow==3.21.2
     # via dataclasses-json
-multidict==6.0.4
+mdurl==0.1.2
+    # via markdown-it-py
+multidict==6.0.5
     # via
     #   aiohttp
     #   yarl
 mypy-extensions==1.0.0
     # via typing-inspect
-numpy==1.26.3
+numpy==1.26.4
     # via
     #   langchain
     #   langchain-community
-    #   langchain-openai
     #   qdrant-client
-openai==1.8.0
+openai==1.30.5
     # via langchain-openai
+orjson==3.10.3
+    # via
+    #   fastapi
+    #   langsmith
 packaging==23.2
     # via
     #   langchain-core
@@ -157,7 +181,7 @@ packaging==23.2
     #   pytest
 passlib==1.7.4
     # via -r requirements.in
-pluggy==1.4.0
+pluggy==1.5.0
     # via pytest
 portalocker==2.8.2
     # via qdrant-client
@@ -178,9 +202,9 @@ pyasn1==0.6.0
     #   rsa
 pyasn1-modules==0.4.0
     # via google-auth
-pycparser==2.21
+pycparser==2.22
     # via cffi
-pydantic==2.5.3
+pydantic==2.7.2
     # via
     #   fastapi
     #   langchain
@@ -188,8 +212,14 @@ pydantic==2.5.3
     #   langsmith
     #   openai
     #   qdrant-client
-pydantic-core==2.14.6
+pydantic-core==2.18.3
     # via pydantic
+pygments==2.18.0
+    # via rich
+pymupdf==1.24.5
+    # via -r requirements.in
+pymupdfb==1.24.3
+    # via pymupdf
 pyowm==3.3.0
     # via -r requirements.in
 pyparsing==3.1.2
@@ -198,87 +228,111 @@ pysocks==1.7.1
     # via
     #   pyowm
     #   requests
-pytest==8.1.1
+pytest==8.2.1
     # via -r requirements.in
-python-dateutil==2.8.2
+python-dateutil==2.9.0.post0
     # via faker
-python-dotenv==1.0.0
+python-docx==1.1.2
     # via -r requirements.in
+python-dotenv==1.0.1
+    # via
+    #   -r requirements.in
+    #   uvicorn
 python-jose==3.3.0
     # via -r requirements.in
 python-multipart==0.0.9
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   fastapi
 pyyaml==6.0.1
     # via
     #   langchain
     #   langchain-community
     #   langchain-core
+    #   uvicorn
 qdrant-client==1.9.1
     # via -r requirements.in
-redis==5.0.3
+redis==5.0.4
     # via -r requirements.in
-regex==2023.12.25
+regex==2024.5.15
     # via tiktoken
-requests[socks]==2.31.0
+requests[socks]==2.32.3
     # via
     #   -r requirements.in
     #   google-api-core
     #   langchain
     #   langchain-community
-    #   langchain-core
     #   langsmith
     #   pyowm
     #   tiktoken
+rich==13.7.1
+    # via typer
 rsa==4.9
     # via
     #   google-auth
     #   python-jose
+shellingham==1.5.4
+    # via typer
 six==1.16.0
     # via
     #   ecdsa
     #   python-dateutil
-sniffio==1.3.0
+sniffio==1.3.1
     # via
     #   anyio
     #   httpx
     #   openai
-sqlalchemy==2.0.25
+sqlalchemy==2.0.30
     # via
     #   -r requirements.in
     #   alembic
     #   langchain
     #   langchain-community
-starlette==0.35.1
+starlette==0.37.2
     # via fastapi
-tenacity==8.2.3
+tenacity==8.3.0
     # via
     #   langchain
     #   langchain-community
     #   langchain-core
-tiktoken==0.5.2
+tiktoken==0.7.0
     # via langchain-openai
-tqdm==4.66.1
+tqdm==4.66.4
     # via openai
-typing-extensions==4.9.0
+typer==0.12.3
+    # via fastapi-cli
+typing-extensions==4.12.1
     # via
     #   alembic
     #   fastapi
     #   openai
     #   pydantic
     #   pydantic-core
+    #   python-docx
     #   sqlalchemy
+    #   typer
     #   typing-inspect
 typing-inspect==0.9.0
     # via dataclasses-json
+ujson==5.10.0
+    # via fastapi
 uritemplate==4.1.1
     # via google-api-python-client
-urllib3==2.1.0
+urllib3==2.2.1
     # via
     #   qdrant-client
     #   requests
-uvicorn==0.29.0
-    # via -r requirements.in
-wheel==0.42.0
+uvicorn[standard]==0.30.1
+    # via
+    #   -r requirements.in
+    #   fastapi
+uvloop==0.19.0
+    # via uvicorn
+watchfiles==0.22.0
+    # via uvicorn
+websockets==12.0
+    # via uvicorn
+wheel==0.43.0
     # via -r requirements.in
 yarl==1.9.4
     # via aiohttp

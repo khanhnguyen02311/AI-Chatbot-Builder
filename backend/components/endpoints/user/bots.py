@@ -2,7 +2,7 @@ import os
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
 from fastapi.responses import FileResponse
-from configurations.envs import ChatModels
+from configurations.envs import General
 from components.data import POSTGRES_SESSION_FACTORY
 from components.data.models.postgres import Account
 from components.data.schemas import bot as BotSchemas
@@ -72,14 +72,14 @@ def get_bot_contexts(bot_id: int, account: Account = Depends(AccountService.vali
 
 @router.post("/{bot_id}/contexts")
 async def add_bot_context(bot_id: int, file: UploadFile, account: Account = Depends(AccountService.validate_token)):
-    if file.content_type not in ["text/plain", "application/pdf", "application/msword"]:
+    if file.content_type not in General.BOT_CONTEXT_ALLOWED_MIME_TYPES:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file type, only txt/pdf/doc/docx files allowed")
     file.filename = f"{bot_id}_{int(datetime.now(timezone.utc).timestamp())}_{file.filename}"
 
     with POSTGRES_SESSION_FACTORY() as session:
         bot_service = BotService(session=session)
         bot_context = bot_service.create_new_bot_context(BotContextSchemas.BotContextPOST(filename=file.filename, id_bot=bot_id), account)
-        with open(f"{os.path.join(ChatModels.BOT_CONTEXT_LOCATION, file.filename)}", "wb+") as f:
+        with open(f"{os.path.join(General.BOT_CONTEXT_FILE_LOCATION, file.filename)}", "wb+") as f:
             try:
                 f.write(file.file.read())
             except Exception as e:
@@ -97,10 +97,10 @@ def get_bot_context_file(bot_id: int, context_id: int, account: Account = Depend
         if context is None:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot context not found")
 
-        if not os.path.exists(os.path.join(ChatModels.BOT_CONTEXT_LOCATION, context.filename)):
+        if not os.path.exists(os.path.join(General.BOT_CONTEXT_FILE_LOCATION, context.filename)):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot context's file data not found")
 
-        return FileResponse(f"{os.path.join(ChatModels.BOT_CONTEXT_LOCATION, context.filename)}")
+        return FileResponse(f"{os.path.join(General.BOT_CONTEXT_FILE_LOCATION, context.filename)}")
 
 
 @router.delete("/{bot_id}/contexts/{context_id}")
@@ -108,7 +108,7 @@ async def delete_bot_context(bot_id: int, context_id: int, account: Account = De
     with POSTGRES_SESSION_FACTORY() as session:
         bot_service = BotService(session=session)
         deleted_bot_context = bot_service.delete_bot_context(context_id, account)
-        os.remove(f"{os.path.join(ChatModels.BOT_CONTEXT_LOCATION, deleted_bot_context.filename)}")
+        os.remove(f"{os.path.join(General.BOT_CONTEXT_FILE_LOCATION, deleted_bot_context.filename)}")
         session.commit()
     return {"message": "Bot context deleted"}
     # TODO: additional step to remove from vector dbs

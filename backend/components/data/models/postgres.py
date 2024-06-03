@@ -10,6 +10,7 @@ def aware_utcnow():
 
 
 str16 = Annotated[str, mapped_column(VARCHAR(16))]
+str32 = Annotated[str, mapped_column(VARCHAR(32))]
 str64 = Annotated[str, mapped_column(VARCHAR(64))]
 str256 = Annotated[str, mapped_column(VARCHAR(256))]
 

@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     libev4 \
     libev-dev \
-    python3-pip
+    python3-pip \
+    antiword
 
 RUN pip install --upgrade pip && pip install --no-cache-dir --verbose -r requirements.txt
 
