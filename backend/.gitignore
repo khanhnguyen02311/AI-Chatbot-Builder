@@ -3,4 +3,5 @@
 .env.prod
 note.txt
 
-etc/userdata
+etc/userdata/*
+!etc/userdata/testfile.*

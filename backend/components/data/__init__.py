@@ -5,6 +5,10 @@ from .models import postgres as PostgresModels
 from configurations.arguments import APP_DEBUG
 from configurations.envs import Postgres, SQLAlchemy, Redis
 
+POSTGRES_ENGINE = None
+POSTGRES_SESSION_FACTORY = None
+REDIS_SESSION = None
+
 
 def setup_default_data(postgres_session_factory: sessionmaker):
     with postgres_session_factory.begin() as session:
@@ -28,24 +32,25 @@ def setup_default_data(postgres_session_factory: sessionmaker):
         session.commit()
 
 
-# For PostgresSQL
-POSTGRES_ENGINE = create_engine(url=Postgres.URL,
-                                echo=APP_DEBUG,
-                                hide_parameters=not APP_DEBUG,
-                                pool_size=SQLAlchemy.POOL_SIZE,
-                                max_overflow=SQLAlchemy.MAX_OVERFLOW,
-                                pool_pre_ping=SQLAlchemy.POOL_PRE_PING)
+def init_data_structure():
+    global POSTGRES_ENGINE, POSTGRES_SESSION_FACTORY, REDIS_SESSION
+    # For PostgresSQL
+    POSTGRES_ENGINE = create_engine(url=Postgres.URL,
+                                    echo=APP_DEBUG,
+                                    hide_parameters=not APP_DEBUG,
+                                    pool_size=SQLAlchemy.POOL_SIZE,
+                                    max_overflow=SQLAlchemy.MAX_OVERFLOW,
+                                    pool_pre_ping=SQLAlchemy.POOL_PRE_PING)
 
-POSTGRES_SESSION_FACTORY = sessionmaker(bind=POSTGRES_ENGINE,
-                                        autoflush=SQLAlchemy.AUTO_FLUSH,
-                                        autocommit=SQLAlchemy.AUTO_COMMIT)
+    POSTGRES_SESSION_FACTORY = sessionmaker(bind=POSTGRES_ENGINE,
+                                            autoflush=SQLAlchemy.AUTO_FLUSH,
+                                            autocommit=SQLAlchemy.AUTO_COMMIT)
 
-# PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
-PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
+    # PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
+    PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
 
-setup_default_data(POSTGRES_SESSION_FACTORY)
+    setup_default_data(POSTGRES_SESSION_FACTORY)
 
-# For Redis
-REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, password=Redis.PASSWORD)
-REDIS_SESSION.flushdb()
-
+    # For Redis
+    REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, password=Redis.PASSWORD)
+    REDIS_SESSION.flushdb()

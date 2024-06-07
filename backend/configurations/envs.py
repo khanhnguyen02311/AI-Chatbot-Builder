@@ -55,6 +55,12 @@ class SQLAlchemy:
     POOL_PRE_PING = False
 
 
+class Qdrant:
+    HOST = environ.get("QDRANT_HOST")
+    PORT = int(environ.get("QDRANT_PORT"))
+    COLLECTION_PREFIX = environ.get("QDRANT_COLLECTION_PREFIX")
+
+
 class ChatModels:
     HUGGINGFACE_API_KEY = environ.get("HUGGINGFACE_API_KEY")
     OPENAI_API_KEY = environ.get("OPENAI_API_KEY")

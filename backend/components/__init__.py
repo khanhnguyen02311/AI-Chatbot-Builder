@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from configurations.arguments import APP_STAGE, APP_DEBUG
 from .endpoints import super_hub, tags_metadata
-from . import data
+from .data import init_data_structure
+from agent_system.data import init_embedding_structure
 
 
 @asynccontextmanager
@@ -14,6 +15,10 @@ async def lifespan(app: FastAPI):
 
 
 def serve_api():
+
+    init_data_structure()
+    init_embedding_structure()
+
     app = FastAPI(lifespan=lifespan, debug=APP_DEBUG, openapi_tags=tags_metadata, redoc_url=None)
     app.add_middleware(
         CORSMiddleware,
