@@ -67,6 +67,12 @@ class ChatModels:
     GOOGLE_API_KEY = environ.get("GOOGLE_API_KEY")
     GOOGLE_CSE_ID = environ.get("GOOGLE_CSE_ID")
     OPENWEATHERMAP_API_KEY = environ.get("OPENWEATHERMAP_API_KEY")
+    ALLOWED_EMBEDDING_MODELS = {
+        "openai/text-embedding-3-small": 1536,
+        "openai/text-embedding-3-large": 3072,
+        # "vinai/phobert-base": 768,
+        # "vinai/phobert-base-v2": 768
+    }
 
 
 class Chat:

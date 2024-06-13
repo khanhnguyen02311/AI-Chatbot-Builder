@@ -1,38 +1,43 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 from langchain_openai import OpenAIEmbeddings
-from configurations.envs import Qdrant
-
-QDRANT_CLIENT = None
-EMBEDDING_MODEL = None
+from configurations.envs import Qdrant, ChatModels
 
 
 class EmbeddingModelWrapper:
     def __init__(self, model_name: str = "openai/text-embedding-3-small"):
-        if model_name not in ["openai/text-embedding-3-small", "openai/text-embedding-3-large"]:  # , "vinai/phobert-base", "vinai/phobert-base-v2"]
-            raise Exception("embedding model not supported for now")
+        if model_name not in list(ChatModels.ALLOWED_EMBEDDING_MODELS.keys()):
+            raise Exception("Embedding model not supported for now")
 
         self.model_name = model_name
-        self.model = OpenAIEmbeddings(model=model_name.split("/")[1])
+        self.model_dimension = ChatModels.ALLOWED_EMBEDDING_MODELS[model_name]
+        self.model = OpenAIEmbeddings(model=model_name.split("/")[1], dimension=self.model_dimension)
 
-    def embed_data(self, data: list[str] | str):
+    def embed_data(self, data: str | list[str]):
         if isinstance(self.model, OpenAIEmbeddings):
-            if type(data) == list[str]:
-                return self.model.embed_documents(data)
-            else:
+            if type(data) == str:
                 return self.model.embed_query(data)
-        raise Exception("embedding model error")
+            else:
+                return self.model.embed_documents(data)
+        # elif isinstance(self.model, "phobert"):
+        #     pass
+
+        raise Exception("Embedding model not found or not supported")
 
 
-def init_embedding_structure(embedding_model_name: str = "openai/text-embedding-3-small"):
-    global QDRANT_CLIENT, EMBEDDING_MODEL
+QDRANT_SESSION: QdrantClient | None = None
+DEFAULT_EMBEDDING_MODEL: EmbeddingModelWrapper | None = None
 
-    if QDRANT_CLIENT is None:
-        QDRANT_CLIENT = QdrantClient(host=Qdrant.HOST, port=Qdrant.PORT)
 
-    if not QDRANT_CLIENT.collection_exists(collection_name=Qdrant.COLLECTION_PREFIX + "openai_1536"):
-        QDRANT_CLIENT.create_collection(
-            collection_name=Qdrant.COLLECTION_PREFIX + "openai_1536",
-            vectors_config=VectorParams(size=1536, distance=Distance.COSINE))
+def init_embedding_structure(default_embedding_model_name: str = "openai/text-embedding-3-small"):
+    global QDRANT_SESSION, DEFAULT_EMBEDDING_MODEL
 
-    EMBEDDING_MODEL = EmbeddingModelWrapper(embedding_model_name)
+    DEFAULT_EMBEDDING_MODEL = EmbeddingModelWrapper(model_name=default_embedding_model_name)
+
+    if QDRANT_SESSION is None:
+        QDRANT_SESSION = QdrantClient(host=Qdrant.HOST, port=Qdrant.PORT)
+
+    if not QDRANT_SESSION.collection_exists(collection_name=Qdrant.COLLECTION_PREFIX + default_embedding_model_name):
+        QDRANT_SESSION.create_collection(
+            collection_name=Qdrant.COLLECTION_PREFIX + default_embedding_model_name,
+            vectors_config=VectorParams(size=ChatModels.ALLOWED_EMBEDDING_MODELS[default_embedding_model_name], distance=Distance.COSINE))

@@ -7,12 +7,15 @@ import docx
 from docx.text.paragraph import Paragraph
 from docx.table import Table
 from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter
-from configurations.envs import General
+from configurations.envs import General, Qdrant
 from components.data.models import postgres as PostgresModels
+from components.data.schemas import bot_context as BotContextSchemas
+from . import EmbeddingModelWrapper, DEFAULT_EMBEDDING_MODEL, QDRANT_SESSION
+from qdrant_client.models import PointStruct
 
 
 class DataLoader:
-    def parse_to_text(self, filename: str):
+    def parse_to_text(self, filename: str) -> str | None:
         """Used to extract & clean text from txt/pdf/doc/docx files"""
 
         file_path = os.path.join(General.BOT_CONTEXT_FILE_LOCATION, filename)
@@ -56,17 +59,17 @@ class DataLoader:
             print(e)
             return None
 
-    def split_text(self, text: str, chunk_size: int = 1000, chunk_overlap: int = 100):
+    def split_text(self, text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
         text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n", "\n", ".", " ", ""], chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         documents = text_splitter.create_documents([text])
         return [doc.page_content for doc in documents]
 
-    def load_chunks_from_bot_context(self, bot_context: PostgresModels.BotContext):
+    def get_chunks_from_bot_context(self, bot_context: PostgresModels.BotContext, chunk_size: int = 800, chunk_overlap: int = 0) -> list[str]:
         mime_type = mimetypes.guess_type(bot_context.filename)[0]
         if mime_type not in General.BOT_CONTEXT_ALLOWED_MIME_TYPES:
             raise Exception("Invalid file type, only txt/pdf/doc/docx files allowed")
-        text = self.parse_to_text(bot_context.filename)
-        split_chunks = self.split_text(text, chunk_size=800, chunk_overlap=0)
+        text_file = self.parse_to_text(bot_context.filename)
+        split_chunks = self.split_text(text_file, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
         return split_chunks
 
     def load_chunks_to_chroma(self, bot_context: PostgresModels.BotContext, split_chunks: list[str]):
@@ -81,8 +84,27 @@ class DataLoader:
         #     )
         pass
 
-    def load_chunks_to_qdrant(self, bot_context: PostgresModels.BotContext, split_chunks: list[str]):
-        pass
+    def load_chunks_to_qdrant(self, bot_context: PostgresModels.BotContext, chunks: list[str], use_default_embedding: bool = True, custom_embedding_model_name: str | None = None):
+        metadata = {
+            "bot_context": BotContextSchemas.BotContextFULL.model_validate(bot_context).model_dump()
+        }
+
+        if use_default_embedding:
+            metadata["embedding_model"] = DEFAULT_EMBEDDING_MODEL.model_name
+            embed_chunk_vecs = DEFAULT_EMBEDDING_MODEL.embed_data(chunks)
+            collection_name = Qdrant.COLLECTION_PREFIX + DEFAULT_EMBEDDING_MODEL.model_name
+        else:
+            embedding = EmbeddingModelWrapper(model_name=custom_embedding_model_name)
+            metadata["embedding_model"] = custom_embedding_model_name
+            embed_chunk_vecs = embedding.embed_data(chunks)
+            collection_name = Qdrant.COLLECTION_PREFIX + custom_embedding_model_name
+            # todo: some kinds of saving the embedding model name to the database for later searchs
+
+        QDRANT_SESSION.upload_points(
+            collection_name=collection_name,
+            points=[PointStruct(vector=chunk_vec, metadata=metadata) for chunk_vec in embed_chunk_vecs],
+            metadata=metadata
+        )
 
 
 if __name__ == "__main__":

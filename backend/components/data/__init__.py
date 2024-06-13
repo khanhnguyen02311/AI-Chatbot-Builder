@@ -1,16 +1,16 @@
 import redis
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import postgres as PostgresModels
 from configurations.arguments import APP_DEBUG
 from configurations.envs import Postgres, SQLAlchemy, Redis
 
-POSTGRES_ENGINE = None
-POSTGRES_SESSION_FACTORY = None
-REDIS_SESSION = None
+POSTGRES_ENGINE: Engine | None = None
+POSTGRES_SESSION_FACTORY: sessionmaker | None = None
+REDIS_SESSION: redis.Redis | None = None
 
 
-def setup_default_data(postgres_session_factory: sessionmaker):
+def __setup_default_data(postgres_session_factory: sessionmaker):
     with postgres_session_factory.begin() as session:
         check_existed = session.get(PostgresModels.AccountRole, 1)
         if check_existed is not None:
@@ -49,7 +49,7 @@ def init_data_structure():
     # PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
     PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
 
-    setup_default_data(POSTGRES_SESSION_FACTORY)
+    __setup_default_data(POSTGRES_SESSION_FACTORY)
 
     # For Redis
     REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, password=Redis.PASSWORD)

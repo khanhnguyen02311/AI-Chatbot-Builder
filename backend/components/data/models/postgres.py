@@ -166,6 +166,7 @@ class BotContext(Base):
     id: Mapped[int_PK]
     filename: Mapped[str64]
     time_created: Mapped[timestamp]
+    embedding_model_used: Mapped[Optional[str64]]
 
     id_bot: Mapped[int] = Column(INTEGER, ForeignKey('bot.id'))
 
