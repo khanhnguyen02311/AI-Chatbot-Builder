@@ -78,12 +78,14 @@ class ChatService:
 
         if with_validation:
             self.validate_chat_account_session(message_data.id_chat_session, chat_account)
+
         if message_data.type in PostgresModels.CONSTANTS.ChatMessage_type[:2]:
             chat_message = PostgresModels.ChatMessage(**message_data.model_dump(exclude_none=True))
         elif message_data.type in PostgresModels.CONSTANTS.ChatMessage_type[2:]:
             chat_message = PostgresModels.ChatMessage(**message_data.model_dump(exclude_none=True), id_chat_account=chat_account.id)
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid message type, must be one of {PostgresModels.CONSTANTS.ChatMessage_type}")
+
         self.session.add(chat_message)
         self.session.flush()
         return chat_message

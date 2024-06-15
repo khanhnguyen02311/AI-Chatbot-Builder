@@ -1,6 +1,5 @@
 from datetime import datetime
 from . import BaseModel, BaseORMModel, BaseListModel
-from pydantic import Field
 
 
 class ChatMessageFULL(BaseORMModel):

@@ -3,22 +3,23 @@ from datetime import datetime, timezone
 from typing import Any
 from starlette.types import Receive, Scope, Send
 from fastapi import WebSocket, WebSocketException, status
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from components.data import REDIS_SESSION, POSTGRES_SESSION_FACTORY
-from components.data.models import postgres as PostgresModel
+from components.data.models import postgres as PostgresModels
 from components.data.schemas import chat_message as ChatMessageSchemas
 from components.repositories.chat_account import ChatAccountRepository
 from components.services.chat import ChatService
 from agent_system.agents.account import AccountAgent
 
 
-class CONSTANTS:
-    type = ["success", "error", "message", "notification"]
-
-
 class WebsocketMessage(BaseModel):
     type: str
     data: Any
+
+    @field_validator("type")
+    def validate_message_type(cls, value):
+        if value not in ["MESSAGE", "NOTIFICATION", "SUCCESS", "ERROR"]:
+            raise ValueError('Invalid message type, must be one of ["message", "notification", "success", "error"]')
 
 
 class CustomWebsocket(WebSocket):
@@ -35,14 +36,14 @@ class CustomWebsocket(WebSocket):
 
 class WebsocketService:
     connections_by_chat_account: dict[int, list[CustomWebsocket]]
-    connections_by_ws: dict[CustomWebsocket, PostgresModel.ChatAccount]
+    connections_by_ws: dict[CustomWebsocket, PostgresModels.ChatAccount]
 
     def __init__(self):
         self.connections_by_chat_account = {}
         self.connections_by_ws = {}
 
     @staticmethod
-    def create_one_time_websocket_token(chat_account: PostgresModel.ChatAccount):
+    def create_one_time_websocket_token(chat_account: PostgresModels.ChatAccount):
         token = uuid.uuid4().hex + uuid.uuid4().hex
         REDIS_SESSION.setex(f"WS_token:{token}", 60, str(chat_account.id))
         return {"token": token,
@@ -59,6 +60,19 @@ class WebsocketService:
             session.expunge_all()
             return chat_account
 
+    @staticmethod
+    def validate_user_message(message: dict) -> tuple[str | None, ChatMessageSchemas.ChatMessagePOST | None]:
+        try:
+            message_data = ChatMessageSchemas.ChatMessagePOST.model_validate(message)
+            if message_data.type not in PostgresModels.CONSTANTS.ChatMessage_type[3:]:
+                return f"Invalid message type, must be one of {PostgresModels.CONSTANTS.ChatMessage_type[3:]}", None
+            if message_data.id_chat_session is None:
+                return "id_chat_session is required", None
+            return None, message_data
+
+        except Exception as e:
+            return str(e), None
+
     async def connect(self, ws: CustomWebsocket, token: str):
         chat_account = self.validate_one_time_websocket_token(token)
         if chat_account is None:
@@ -68,24 +82,11 @@ class WebsocketService:
             self.connections_by_chat_account[chat_account.id] = []
         self.connections_by_chat_account[chat_account.id].append(ws)
         self.connections_by_ws[ws] = chat_account
+        return chat_account
 
     def disconnect(self, ws: CustomWebsocket):
         chat_account = self.connections_by_ws.pop(ws)
         self.connections_by_chat_account[chat_account.id].remove(ws)
-
-    async def process_message(self, ws: CustomWebsocket, message: dict):
-        chat_account = self.connections_by_ws[ws]
-        message_data = ChatMessageSchemas.ChatMessagePOST.model_validate(message)
-        try:
-            with POSTGRES_SESSION_FACTORY() as session:
-                chat_service = ChatService(session)
-                chat_service.create_new_chat_message(message_data, chat_account)
-                response = WebsocketMessage(type="success", data="Message sent")
-                await self.send_message(chat_account.id, response)
-                session.commit()
-        except Exception as e:
-            response = WebsocketMessage(type="error", data=str(e))
-            await self.send_message(chat_account.id, response)
 
     async def send_message(self, chat_account_id: int, message: WebsocketMessage):
         for ws in self.connections_by_chat_account[chat_account_id]:
