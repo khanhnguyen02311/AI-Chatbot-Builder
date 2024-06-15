@@ -25,8 +25,8 @@ services:
       - '6333:6333'
       - '6334:6334'
 
-  db-chroma:
-    image: chromadb/chroma:latest
-    restart: no
-    ports:
-      - 9000:8000
+#  db-chroma:
+#    image: chromadb/chroma:latest
+#    restart: no
+#    ports:
+#      - 9000:8000

@@ -15,6 +15,7 @@ redis
 langchain
 langchain-openai
 langchain-community
+langchain-google-community
 google-api-python-client
 pyowm
 qdrant-client

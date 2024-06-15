@@ -26,10 +26,12 @@ class DataLoader:
             if mime_type == "text/plain":
                 with open(file_path, "r") as file:
                     data = file.read()
+
             # pdf file, use pymupdf
             elif mime_type == "application/pdf":
                 for page in pymupdf.open(file_path):
                     data += page.get_text().replace("\n", " ") + "\n"
+
             # docx file, use python-docx
             elif mime_type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
                 file_docx = docx.Document(file_path)
@@ -43,6 +45,7 @@ class DataLoader:
                                 data += cell.text
                                 print("|", end="")
                         print("\n")
+
             # doc file, use antiword package from shell
             else:
                 result = subprocess.run(["antiword", file_path], capture_output=True)

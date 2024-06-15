@@ -1,6 +1,6 @@
 from configurations.envs import ChatModels
 from langchain.agents import Tool
-from langchain_community.utilities.google_search import GoogleSearchAPIWrapper
+from langchain_google_community import GoogleSearchAPIWrapper
 
 google_search_util = GoogleSearchAPIWrapper(google_api_key=ChatModels.GOOGLE_API_KEY, google_cse_id=ChatModels.GOOGLE_CSE_ID, k=5)
 
