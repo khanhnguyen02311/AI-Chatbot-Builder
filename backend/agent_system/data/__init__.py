@@ -3,9 +3,11 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 from langchain_openai import OpenAIEmbeddings
 from configurations.envs import Qdrant, ChatModels
 
+_default_embedding_model = "openai@text-embedding-3-small"
+
 
 class EmbeddingModelWrapper:
-    def __init__(self, model_name: str = "openai@text-embedding-3-small"):
+    def __init__(self, model_name: str = _default_embedding_model):
         if model_name not in list(ChatModels.ALLOWED_EMBEDDING_MODELS.keys()):
             raise Exception("Embedding model not supported for now")
 
@@ -25,21 +27,13 @@ class EmbeddingModelWrapper:
         raise Exception("Embedding model not found or not supported")
 
 
-QDRANT_SESSION: QdrantClient | None = None
-DEFAULT_EMBEDDING_MODEL: EmbeddingModelWrapper | None = None
-
-
-def init_embedding_structure(default_embedding_model_name: str = "openai@text-embedding-3-small"):
-    global QDRANT_SESSION, DEFAULT_EMBEDDING_MODEL
-
-    DEFAULT_EMBEDDING_MODEL = EmbeddingModelWrapper(model_name=default_embedding_model_name)
-
-    if QDRANT_SESSION is None:
-        QDRANT_SESSION = QdrantClient(f"{Qdrant.HOST}:{Qdrant.PORT}")
-
-    collection_name = Qdrant.COLLECTION_PREFIX + default_embedding_model_name
-
+def init_embedding_structure():
+    collection_name = Qdrant.COLLECTION_PREFIX + _default_embedding_model
     if not QDRANT_SESSION.collection_exists(collection_name=collection_name):
         QDRANT_SESSION.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=ChatModels.ALLOWED_EMBEDDING_MODELS[default_embedding_model_name], distance=Distance.COSINE))
+            vectors_config=VectorParams(size=ChatModels.ALLOWED_EMBEDDING_MODELS[_default_embedding_model], distance=Distance.COSINE))
+
+
+QDRANT_SESSION = QdrantClient(f"{Qdrant.HOST}:{Qdrant.PORT}")
+DEFAULT_EMBEDDING_MODEL = EmbeddingModelWrapper()

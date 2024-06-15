@@ -5,13 +5,27 @@ from .models import postgres as PostgresModels
 from configurations.arguments import APP_DEBUG
 from configurations.envs import Postgres, SQLAlchemy, Redis
 
-POSTGRES_ENGINE: Engine | None = None
-POSTGRES_SESSION_FACTORY: sessionmaker | None = None
-REDIS_SESSION: redis.Redis | None = None
+# Misconceptions in import: https://stackoverflow.com/a/43855120
+# Basically from X import Y doesn't import the object Y, it imports the value inside Y. So cannot change these object values when outside the module.
+
+POSTGRES_ENGINE = create_engine(url=Postgres.URL,
+                                echo=APP_DEBUG,
+                                hide_parameters=not APP_DEBUG,
+                                pool_size=SQLAlchemy.POOL_SIZE,
+                                max_overflow=SQLAlchemy.MAX_OVERFLOW,
+                                pool_pre_ping=SQLAlchemy.POOL_PRE_PING)
+
+POSTGRES_SESSION_FACTORY = sessionmaker(bind=POSTGRES_ENGINE,
+                                        autoflush=SQLAlchemy.AUTO_FLUSH,
+                                        autocommit=SQLAlchemy.AUTO_COMMIT)
+
+REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, password=Redis.PASSWORD)
 
 
-def __setup_default_data(postgres_session_factory: sessionmaker):
-    with postgres_session_factory.begin() as session:
+def init_data_structure():
+    PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
+
+    with POSTGRES_SESSION_FACTORY() as session:
         check_existed = session.get(PostgresModels.AccountRole, 1)
         if check_existed is not None:
             return
@@ -31,26 +45,8 @@ def __setup_default_data(postgres_session_factory: sessionmaker):
         session.add(default_admin_chat)
         session.commit()
 
-
-def init_data_structure():
-    global POSTGRES_ENGINE, POSTGRES_SESSION_FACTORY, REDIS_SESSION
-    # For PostgresSQL
-    POSTGRES_ENGINE = create_engine(url=Postgres.URL,
-                                    echo=APP_DEBUG,
-                                    hide_parameters=not APP_DEBUG,
-                                    pool_size=SQLAlchemy.POOL_SIZE,
-                                    max_overflow=SQLAlchemy.MAX_OVERFLOW,
-                                    pool_pre_ping=SQLAlchemy.POOL_PRE_PING)
-
-    POSTGRES_SESSION_FACTORY = sessionmaker(bind=POSTGRES_ENGINE,
-                                            autoflush=SQLAlchemy.AUTO_FLUSH,
-                                            autocommit=SQLAlchemy.AUTO_COMMIT)
-
-    # PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
-    PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
-
-    __setup_default_data(POSTGRES_SESSION_FACTORY)
-
-    # For Redis
-    REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, password=Redis.PASSWORD)
     REDIS_SESSION.flushdb()
+
+
+if __name__ == "__main__":
+    init_data_structure()

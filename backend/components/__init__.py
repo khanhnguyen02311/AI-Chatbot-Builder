@@ -2,9 +2,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from configurations.arguments import APP_STAGE, APP_DEBUG
-from .endpoints import super_hub, tags_metadata
-from .data import init_data_structure
+from components.data import init_data_structure
 from agent_system.data import init_embedding_structure
+from .endpoints import super_hub, tags_metadata
 
 
 @asynccontextmanager
@@ -15,7 +15,6 @@ async def lifespan(app: FastAPI):
 
 
 def serve_api():
-
     init_data_structure()
     init_embedding_structure()
 
