@@ -10,3 +10,7 @@ def get_search_weather_tool():
         name="search_weather",
         description="Get current weather information of specific location. The input format is 'City, Country'.",
         func=weather_search_util.run)
+
+
+if __name__ == "__main__":
+    print(weather_search_util.run("Da Lat, Vietnam"))
