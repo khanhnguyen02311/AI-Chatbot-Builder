@@ -1,5 +1,5 @@
 import redis
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from .models import postgres as PostgresModels
 from configurations.arguments import APP_DEBUG

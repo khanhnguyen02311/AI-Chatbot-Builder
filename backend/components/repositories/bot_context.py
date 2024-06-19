@@ -2,7 +2,7 @@ from abc import ABC
 from sqlalchemy import select, update, delete, and_, or_
 from . import BaseRepository
 from components.data.models import postgres as PostgresModels
-from components.data.schemas import bot_context as BotSchemas
+from components.data.schemas import bot_context as BotContextSchemas
 
 
 class BotContextRepository(BaseRepository, ABC):
@@ -26,8 +26,12 @@ class BotContextRepository(BaseRepository, ABC):
         self.session.add(new_bot_context)
         self.session.flush()
 
-    def update(self):
-        return super().update()
+    def update(self, identifier: int, new_data: BotContextSchemas.BotContextPUT):
+        update_query = update(PostgresModels.BotContext).returning(PostgresModels.BotContext).where(PostgresModels.BotContext.id == identifier).values(
+            **new_data.model_dump(exclude_none=True))
+        new_bot_data = self.session.scalar(update_query)
+        self.session.flush()
+        return new_bot_data
 
     def delete(self, identifier: int):
         delete_query = delete(PostgresModels.BotContext).returning(PostgresModels.BotContext).where(PostgresModels.BotContext.id == identifier)

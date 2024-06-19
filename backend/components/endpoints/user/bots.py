@@ -103,6 +103,14 @@ def get_bot_context_file(bot_id: int, context_id: int, account: Account = Depend
         return FileResponse(f"{os.path.join(General.BOT_CONTEXT_FILE_LOCATION, context.filename)}")
 
 
+@router.put("/{bot_id}/contexts/{context_id}")
+def update_bot_context_data(bot_context_data: BotContextSchemas.BotContextPUT, bot_id: int, context_id: int, account: Account = Depends(AccountService.validate_token)):
+    with POSTGRES_SESSION_FACTORY() as session:
+        bot_service = BotService(session=session)
+        updated_bot_context = bot_service.update_bot_context(bot_id, context_id, bot_context_data, account)
+        return BotContextSchemas.BotContextFULL.model_validate(updated_bot_context)
+
+
 @router.delete("/{bot_id}/contexts/{context_id}")
 async def delete_bot_context(bot_id: int, context_id: int, account: Account = Depends(AccountService.validate_token)):
     with POSTGRES_SESSION_FACTORY() as session:

@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Annotated, Any
 from fastapi import Depends, HTTPException, status
+from configurations.envs import ChatModels
 from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import bot as BotSchemas
@@ -27,7 +28,7 @@ class BotService:
         return bot
 
     def validate_accessible_bot(self, bot_id: int, account_id: int):
-        """Validate if a bot is readable by an account"""
+        """Validate if a bot is readable by an account (public bot OR account's bot)"""
 
         bot = self.bot_repository.get(bot_id)
         if bot is None or not (bot.is_public or bot.id_account == account_id):
@@ -88,18 +89,27 @@ class BotService:
         self.validate_account_bot(bot_id, account.id)
         return self.bot_context_repository.get_all_by_bot(bot_id)
 
-    def create_new_bot_context(self, context_data: BotContextSchemas.BotContextPOST, account: PostgresModels.Account):
+    def create_new_bot_context(self, new_context_data: BotContextSchemas.BotContextPOST, account: PostgresModels.Account):
         """Create a new context"""
 
-        self.validate_account_bot(context_data.id_bot, account.id)
-        new_context = PostgresModels.BotContext(**context_data.model_dump())
+        self.validate_account_bot(new_context_data.id_bot, account.id)
+        if new_context_data.embedding_model_used is not None and new_context_data.embedding_model_used not in list(ChatModels.ALLOWED_EMBEDDING_MODELS.keys()):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Embedding model not supported for now")
+
+        new_context = PostgresModels.BotContext(**new_context_data.model_dump(exclude_none=True))
         self.bot_context_repository.create(new_context)
         return new_context
 
-    def delete_bot_context(self, context_id: int, account: PostgresModels.Account):
+    def update_bot_context(self, bot_id: int, bot_context_id: int, context_data: BotContextSchemas.BotContextPUT, account: PostgresModels.Account):
+        """Update existed bot context"""
+        _ = self.get_bot_context(bot_id, bot_context_id, account)  # just for validation
+        updated_bot_context = self.bot_context_repository.update(bot_context_id, context_data)
+        return updated_bot_context
+
+    def delete_bot_context(self, bot_context_id: int, account: PostgresModels.Account):
         """Delete a context"""
 
-        bot_context = self.bot_context_repository.get(context_id)
+        bot_context = self.bot_context_repository.get(bot_context_id)
         self.validate_account_bot(bot_context.id_bot, account.id)
-        deleted_context = self.bot_context_repository.delete(context_id)
+        deleted_context = self.bot_context_repository.delete(bot_context_id)
         return deleted_context
