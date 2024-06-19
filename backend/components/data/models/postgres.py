@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from typing import Annotated, Optional, List, Any
 from sqlalchemy import ForeignKey, Column, INTEGER, TEXT, VARCHAR, SMALLINT, TIMESTAMP, ARRAY, JSON, BIGINT, FLOAT, BOOLEAN
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+from configurations.envs import ChatModels
 
 
 def aware_utcnow():
@@ -165,8 +166,9 @@ class BotContext(Base):
     __tablename__ = 'bot_context'
     id: Mapped[int_PK]
     filename: Mapped[str64]
+    description: Mapped[Optional[str]]
+    embedding_model_used: Mapped[Optional[str64]] = mapped_column(VARCHAR(64), default=ChatModels.DEFAULT_EMBEDDING_MODEL_NAME)
     time_created: Mapped[timestamp]
-    embedding_model_used: Mapped[Optional[str64]]
 
     id_bot: Mapped[int] = Column(INTEGER, ForeignKey('bot.id'))
 

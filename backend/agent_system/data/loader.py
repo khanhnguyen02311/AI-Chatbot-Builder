@@ -1,3 +1,5 @@
+import uuid
+from datetime import datetime
 import os
 import mimetypes
 import re
@@ -6,11 +8,11 @@ import pymupdf
 import docx
 from docx.text.paragraph import Paragraph
 from docx.table import Table
-from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter
-from configurations.envs import General, Qdrant
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from configurations.envs import General, Qdrant, ChatModels
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import bot_context as BotContextSchemas
-from . import EmbeddingModelWrapper, DEFAULT_EMBEDDING_MODEL, QDRANT_SESSION
+from agent_system.data import QDRANT_SESSION, EMBEDDING_SESSION
 from qdrant_client.models import PointStruct
 
 
@@ -76,10 +78,6 @@ class DataLoader:
         return split_chunks
 
     def load_chunks_to_chroma(self, bot_context: PostgresModels.BotContext, split_chunks: list[str]):
-        # documents = text_splitter.create_documents(file_info)
-        #     file.close()
-        #     docs_text = [doc.page_content for doc in documents]
-        #     # embedding = OpenAIEmbeddings()
         #     # embedded_docs = embedding.embed_documents(docs_text)
         #     collection.add(
         #         documents=docs_text,
@@ -87,33 +85,47 @@ class DataLoader:
         #     )
         pass
 
-    def load_chunks_to_qdrant(self, bot_context: PostgresModels.BotContext, chunks: list[str], use_default_embedding: bool = True, custom_embedding_model_name: str | None = None):
+    def load_chunks_to_qdrant(self,
+                              chunks: list[str],
+                              bot_context: PostgresModels.BotContext,
+                              use_default_embedding: bool = True,
+                              custom_embedding_model_name: str | None = None,
+                              wait_for_completion: bool = True):
+
+        if use_default_embedding is False or custom_embedding_model_name is not None:
+            raise Exception("Custom embedding model not supported yet")
+
         metadata = {
-            "bot_context": BotContextSchemas.BotContextFULL.model_validate(bot_context).model_dump()
+            "id_bot_context": bot_context.id,
+            "id_bot": bot_context.id_bot,
+            "filename": bot_context.filename,
+            "embedding_model": ChatModels.DEFAULT_EMBEDDING_MODEL_NAME,
         }
+        collection_name = Qdrant.COLLECTION_PREFIX + ChatModels.DEFAULT_EMBEDDING_MODEL_NAME
+        embed_chunk_vecs = EMBEDDING_SESSION.embed_data(chunks)
 
-        if use_default_embedding:
-            metadata["embedding_model"] = DEFAULT_EMBEDDING_MODEL.model_name
-            embed_chunk_vecs = DEFAULT_EMBEDDING_MODEL.embed_data(chunks)
-            collection_name = Qdrant.COLLECTION_PREFIX + DEFAULT_EMBEDDING_MODEL.model_name
-        else:
-            embedding = EmbeddingModelWrapper(model_name=custom_embedding_model_name)
-            metadata["embedding_model"] = custom_embedding_model_name
-            embed_chunk_vecs = embedding.embed_data(chunks)
-            collection_name = Qdrant.COLLECTION_PREFIX + custom_embedding_model_name
-            # todo: some kinds of saving the embedding model name to the database for later searchs
+        print(type(embed_chunk_vecs))
 
-        QDRANT_SESSION.upload_points(
+        return QDRANT_SESSION.upsert(
             collection_name=collection_name,
-            points=[PointStruct(vector=chunk_vec, metadata=metadata) for chunk_vec in embed_chunk_vecs],
-            metadata=metadata
+            points=[PointStruct(id=str(uuid.uuid1()), vector=chunk_vec, payload=dict(metadata, original_data=chunks[idx])) for idx, chunk_vec in enumerate(embed_chunk_vecs)],
+            wait=wait_for_completion
         )
 
 
 if __name__ == "__main__":
+    from agent_system.data import init_embedding_structure
+
+    init_embedding_structure()
+
     data_loader = DataLoader()
     extracted_text = data_loader.parse_to_text("testfile.txt")
-    chunks = data_loader.split_text(extracted_text, 800, 0)
-    for i in chunks:
-        print("--NEW CHUNK--")
-        print(i)
+    test_chunks = data_loader.split_text(extracted_text, 800, 0)
+    print(f"testfile.txt is split into {len(test_chunks)} chunks. ")
+    print(f"First chunk sample: \n'{test_chunks[0]}'")
+    print("----")
+
+    test_bot_context = PostgresModels.BotContext(id=0, filename="testfile.txt", id_bot=0, time_created=datetime.now)
+    result = data_loader.load_chunks_to_qdrant(test_chunks, test_bot_context)
+    print("Chunks are loaded into Qdrant")
+    print("Result:", result.model_dump())

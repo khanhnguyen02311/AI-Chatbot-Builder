@@ -1,20 +1,31 @@
-from configurations.envs import ChatModels
 from langchain_core.tools import tool
 from langchain.agents import Tool
+from langchain_community.document_loaders import WebBaseLoader
 
 
 @tool
-def website_scrape_util(url: str, **kwargs):
-    # Todo: scrape, clean and extract to string
-    return "Scraping utility not implemented yet."
+def website_scrape_util(url: str) -> str:
+    """Scrape the provided web page for detailed information."""
+    loader = WebBaseLoader(url)
+    docs = loader.load()
+    return "\n\n".join(
+        [
+            f'<Document name="{doc.metadata.get("title", "")}">\n{doc.page_content}\n</Document>'
+            for doc in docs
+        ]
+    )
+    # Todo: custom website scraper, clean and extract to string
 
 
 def get_scrape_website_tool():
     return Tool(
         name="scrape_website",
-        description="Scrape a website and get the content.",
+        description="Scrape the provided web page for detailed information.",
         func=website_scrape_util)
 
 
 if __name__ == "__main__":
-    print(website_scrape_util("https://vinpearl.com/vi/40-dia-diem-du-lich-viet-nam-noi-tieng-nhat-dinh-nen-den-mot-lan"))
+    tool = get_scrape_website_tool()
+    result = tool.run("https://vinpearl.com/vi/40-dia-diem-du-lich-viet-nam-noi-tieng-nhat-dinh-nen-den-mot-lan")
+    print(result)
+    # print(website_scrape_util.run("https://vinpearl.com/vi/40-dia-diem-du-lich-viet-nam-noi-tieng-nhat-dinh-nen-den-mot-lan"))
