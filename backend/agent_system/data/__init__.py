@@ -34,7 +34,8 @@ def init_embedding_structure():
         print(f"Creating collection {collection_name}")
         create_coll_succeed = QDRANT_SESSION.create_collection(collection_name=collection_name,
                                                                vectors_config=VectorParams(size=ChatModels.ALLOWED_EMBEDDING_MODELS[ChatModels.DEFAULT_EMBEDDING_MODEL_NAME],
-                                                                                           distance=Distance.COSINE))
+                                                                                           distance=Distance.COSINE),
+                                                               timeout=5)
         if not create_coll_succeed:
             raise Exception("Collection creation failed")
         QDRANT_SESSION.create_payload_index(collection_name=collection_name,

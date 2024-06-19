@@ -103,6 +103,9 @@ class BotService:
     def update_bot_context(self, bot_id: int, bot_context_id: int, context_data: BotContextSchemas.BotContextPUT, account: PostgresModels.Account):
         """Update existed bot context"""
         _ = self.get_bot_context(bot_id, bot_context_id, account)  # just for validation
+        if context_data.embedding_model_used is not None and context_data.embedding_model_used not in list(ChatModels.ALLOWED_EMBEDDING_MODELS.keys()):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Embedding model not supported for now")
+
         updated_bot_context = self.bot_context_repository.update(bot_context_id, context_data)
         return updated_bot_context
 

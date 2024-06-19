@@ -108,6 +108,7 @@ def update_bot_context_data(bot_context_data: BotContextSchemas.BotContextPUT, b
     with POSTGRES_SESSION_FACTORY() as session:
         bot_service = BotService(session=session)
         updated_bot_context = bot_service.update_bot_context(bot_id, context_id, bot_context_data, account)
+        session.commit()
         return BotContextSchemas.BotContextFULL.model_validate(updated_bot_context)
 
 
