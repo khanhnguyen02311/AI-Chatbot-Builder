@@ -10,8 +10,9 @@ from Menu import menu
 # logged_in_as:             str:        the username of the logged in user, empty if not logged in
 # access_token:             str:        the access token of the logged in user, empty if not logged in
 # refresh_token:            str:        the refresh token of the logged in user, empty if not logged in
-# bots:                     {str, Any}: a map of bots, used for the bot viewer
 # -----------------------------------------------------------------------------
+
+st.set_page_config(page_title="Trang chủ", layout="wide")
 
 st.session_state.action_result_data = None
 

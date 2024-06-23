@@ -69,7 +69,7 @@ def signup():
         st.sidebar.error("Username or email already exists!")
         return
     if resp.status_code == 422:
-        st.sidebar.error("Invalid data format!")
+        st.sidebar.error("Invalid user format!")
         return
     if resp.status_code != 200:
         st.sidebar.error("Failed to sign up. Please try again.")

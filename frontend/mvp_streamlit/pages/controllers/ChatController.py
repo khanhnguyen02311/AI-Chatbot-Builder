@@ -5,6 +5,7 @@ from . import BaseController
 # var_public_bots
 # var_sessions
 # var_selected_session
+
 @BaseController.with_try_catch
 def load_bot_data():
     # load just public bots for now

@@ -13,8 +13,8 @@ st.title(f"💬 Session: {st.session_state.var_selected_session[0]['name'] if st
 st.subheader(f"Bot: {st.session_state.var_selected_session[1]['name'] if st.session_state.var_selected_session is not None else 'None'}")
 menu_with_redirect()
 
-if "var_public_bots" not in st.session_state:
-    ChatController.load_bot_data()
+ChatController.load_bot_data()
+
 if "var_sessions" not in st.session_state:
     ChatController.load_session_history()
 
@@ -26,7 +26,7 @@ with st.sidebar.form("session_list_form"):
                                       range(len(st.session_state.var_public_bots)),
                                       index=None,
                                       format_func=lambda x: st.session_state.var_public_bots[x]["name"])
-    submit = st.form_submit_button("Session Chat mới", type="primary")
+    submit = st.form_submit_button("Tạo Session với Bot đã chọn", type="primary")
     if submit:
         if selected_bot_index is not None:
             ChatController.create_new_session(selected_bot_index)
