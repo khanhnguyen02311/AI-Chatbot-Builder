@@ -61,7 +61,7 @@ When you have a response to say to the Human, or if you do not need to use a too
 
 ```
 Thought: Do I need to use a tool? No
-Final Answer: [your response here, in the same language as the Human (for example Vietnamese if the Human speaks Vietnamese)]
+Final Answer: [your response here, in the same language as the Human (for example Vietnamese if the Human speaks Vietnamese, or English if the Human speaks English)]
 ```
 
 Begin!
