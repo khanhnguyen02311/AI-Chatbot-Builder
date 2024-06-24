@@ -8,6 +8,8 @@ from components.data.schemas import bot as BotSchemas
 from components.data.schemas import bot_context as BotContextSchemas
 from components.repositories.bot import BotRepository
 from components.repositories.bot_context import BotContextRepository
+from agent_system.data.loader import DataLoader
+from agent_system.data.retriever import DataRetriever
 from agent_system.agents.account import AccountAgent
 
 
@@ -61,7 +63,7 @@ class BotService:
 
         self.validate_account_bot(bot_id, account.id)
         try:
-            _ = AccountAgent(PostgresModels.Bot(**new_data.model_dump(), id_account=account.id))
+            _ = AccountAgent(PostgresModels.Bot(**new_data.model_dump(exclude_none=True), id_account=account.id))
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
         updated_bot = self.bot_repository.update(bot_id, new_data)
@@ -71,6 +73,7 @@ class BotService:
         """Delete a bot"""
 
         self.validate_account_bot(bot_id, account.id)
+        self.get_bot_contexts(bot_id, account)
         deleted_bot = self.bot_repository.delete(bot_id)
         return deleted_bot
 
@@ -93,17 +96,27 @@ class BotService:
         """Create a new context"""
 
         self.validate_account_bot(new_context_data.id_bot, account.id)
-        if new_context_data.embedding_model_used is not None and new_context_data.embedding_model_used not in list(ChatModels.ALLOWED_EMBEDDING_MODELS.keys()):
+        if new_context_data.embedding_model_used is not None and new_context_data.embedding_model_used not in list(
+            ChatModels.ALLOWED_EMBEDDING_MODELS.keys()
+        ):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Embedding model not supported for now")
 
         new_context = PostgresModels.BotContext(**new_context_data.model_dump(exclude_none=True))
         self.bot_context_repository.create(new_context)
         return new_context
 
-    def update_bot_context(self, bot_id: int, bot_context_id: int, context_data: BotContextSchemas.BotContextPUT, account: PostgresModels.Account):
+    def update_bot_context(
+        self,
+        bot_id: int,
+        bot_context_id: int,
+        context_data: BotContextSchemas.BotContextPUT,
+        account: PostgresModels.Account,
+    ):
         """Update existed bot context"""
         _ = self.get_bot_context(bot_id, bot_context_id, account)  # just for validation
-        if context_data.embedding_model_used is not None and context_data.embedding_model_used not in list(ChatModels.ALLOWED_EMBEDDING_MODELS.keys()):
+        if context_data.embedding_model_used is not None and context_data.embedding_model_used not in list(
+            ChatModels.ALLOWED_EMBEDDING_MODELS.keys()
+        ):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Embedding model not supported for now")
 
         updated_bot_context = self.bot_context_repository.update(bot_context_id, context_data)
@@ -116,3 +129,20 @@ class BotService:
         self.validate_account_bot(bot_context.id_bot, account.id)
         deleted_context = self.bot_context_repository.delete(bot_context_id)
         return deleted_context
+
+    def activate_bot_context(self, bot_context: PostgresModels.BotContext):
+        existed_bot_context_chunks = DataRetriever().get_existed_bot_context_vectors(bot_context.id_bot, bot_context.id)
+        print(existed_bot_context_chunks)
+        if len(existed_bot_context_chunks[0]) > 0:
+            print(f"Bot context {bot_context.id} already activated. Exit.")
+            return
+        data_loader = DataLoader()
+        parsed_text = data_loader.parse_to_text(bot_context.filename)
+        if not parsed_text:
+            print(f"Parsing error for BotContext {bot_context.id}. Exit.")
+            # todo: send failed notification
+            return
+        parsed_chunks = data_loader.split_text(parsed_text, 700, 0)
+        result = data_loader.load_chunks_to_qdrant(parsed_chunks, bot_context)
+        print(f"Parsing for BotContext {bot_context.id} is done. Result: {str(result)}")
+        # send result notification

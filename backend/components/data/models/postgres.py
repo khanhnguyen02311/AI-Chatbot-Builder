@@ -56,7 +56,7 @@ class Account(Base):
 
     rel_scenarios: Mapped[List['Scenario']] = relationship('Scenario', back_populates='rel_account', uselist=True)
     rel_businesses: Mapped[List['Business']] = relationship('Business', back_populates='rel_account', uselist=True)
-    rel_bots: Mapped[List['Bot']] = relationship('Bot', back_populates='rel_account', uselist=True)
+    rel_bots: Mapped[List['Bot']] = relationship('Bot', back_populates='rel_account', uselist=True, cascade="all, delete-orphan")
 
 
 class AccountRole(Base):
@@ -151,6 +151,8 @@ class Bot(Base):
     id_account: Mapped[int] = Column(INTEGER, ForeignKey('account.id'))
     rel_account: Mapped[Account] = relationship('Account', back_populates='rel_bots')
 
+    rel_bot_context: Mapped[List['BotContext']] = relationship('BotContext', back_populates='rel_bot', uselist=True, cascade="all, delete-orphan")
+
 
 # class BotModel(Base):
 #     """Store bot model information \n
@@ -171,6 +173,7 @@ class BotContext(Base):
     time_created: Mapped[timestamp]
 
     id_bot: Mapped[int] = Column(INTEGER, ForeignKey('bot.id'))
+    rel_bot: Mapped[Bot] = relationship('Bot')
 
 
 class Scenario(Base):
@@ -217,11 +220,12 @@ class ChatSession(Base):
     time_created: Mapped[timestamp]
 
     id_chat_account: Mapped[int] = Column(INTEGER, ForeignKey('chat_account.id'))
-    # rel_chat_account: Mapped[ChatAccount] = relationship('ChatAccount')
+    rel_chat_account: Mapped[ChatAccount] = relationship('ChatAccount')
 
     id_bot: Mapped[int] = Column(INTEGER, ForeignKey('bot.id'))
     # rel_bot: Mapped[Bot] = relationship('Bot', back_populates='rel_chats')
 
+    rel_chat_message: Mapped[List['ChatMessage']] = relationship('ChatMessage', back_populates='rel_chat_session', uselist=True)
     # preferred way to run chat session
     # id_scenario: Mapped[int] = Column(INTEGER, ForeignKey('scenario.id'))
     # rel_scenario: Mapped[Scenario] = relationship('Scenario', back_populates='rel_chats')
@@ -239,6 +243,7 @@ class ChatMessage(Base):
     time_created: Mapped[timestamp]
 
     id_chat_session: Mapped[int] = Column(INTEGER, ForeignKey('chat_session.id'))
+    rel_chat_session: Mapped[ChatSession] = relationship('ChatSession', back_populates='rel_chat_message')
 
     id_chat_account: Mapped[Optional[int]] = Column(INTEGER, ForeignKey('chat_account.id'))
     # rel_chat_account: Mapped[ChatAccount] = relationship('ChatAccount')

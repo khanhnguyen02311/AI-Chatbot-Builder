@@ -53,11 +53,13 @@ class DataLoader:
                 result = subprocess.run(["antiword", file_path], capture_output=True)
                 data = result.stdout.decode("utf-8")
                 # antiword doesn't keep paragraph structure but split newline for display
-                data = re.sub('(?<![\r\n])(\r?\n|\n?\r)(?![\r\n])', ' ', data)  # remove single newlines, keep multiple newlines
+                data = re.sub(
+                    "(?<![\r\n])(\r?\n|\n?\r)(?![\r\n])", " ", data
+                )  # remove single newlines, keep multiple newlines
 
             # clean up
-            data = re.sub('  +', ' ', data)  # multiple blank spaces to single blank spaces
-            data = re.sub(' *\n+ *', '\n', data)  # multiple newlines to single newlines and strip blank spaces around
+            data = re.sub("  +", " ", data)  # multiple blank spaces to single blank spaces
+            data = re.sub(" *\n+ *", "\n", data)  # multiple newlines to single newlines and strip blank spaces around
             return data
 
         except Exception as e:
@@ -65,11 +67,15 @@ class DataLoader:
             return None
 
     def split_text(self, text: str, chunk_size: int, chunk_overlap: int) -> list[str]:
-        text_splitter = RecursiveCharacterTextSplitter(separators=["\n\n", "\n", ".", " ", ""], chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+        text_splitter = RecursiveCharacterTextSplitter(
+            separators=["\n\n", "\n", ".", " ", ""], chunk_size=chunk_size, chunk_overlap=chunk_overlap
+        )
         documents = text_splitter.create_documents([text])
         return [doc.page_content for doc in documents]
 
-    def get_chunks_from_bot_context(self, bot_context: PostgresModels.BotContext, chunk_size: int = 800, chunk_overlap: int = 0) -> list[str]:
+    def get_chunks_from_bot_context(
+        self, bot_context: PostgresModels.BotContext, chunk_size: int = 800, chunk_overlap: int = 0
+    ) -> list[str]:
         mime_type = mimetypes.guess_type(bot_context.filename)[0]
         if mime_type not in General.BOT_CONTEXT_ALLOWED_MIME_TYPES:
             raise Exception("Invalid file type, only txt/pdf/doc/docx files allowed")
@@ -85,13 +91,14 @@ class DataLoader:
         #     )
         pass
 
-    def load_chunks_to_qdrant(self,
-                              chunks: list[str],
-                              bot_context: PostgresModels.BotContext,
-                              use_default_embedding: bool = True,
-                              custom_embedding_model_name: str | None = None,
-                              wait_for_completion: bool = True):
-
+    def load_chunks_to_qdrant(
+        self,
+        chunks: list[str],
+        bot_context: PostgresModels.BotContext,
+        use_default_embedding: bool = True,
+        custom_embedding_model_name: str | None = None,
+        wait_for_completion: bool = True,
+    ):
         if use_default_embedding is False or custom_embedding_model_name is not None:
             raise Exception("Custom embedding model not supported yet")
 
@@ -104,12 +111,13 @@ class DataLoader:
         collection_name = Qdrant.COLLECTION_PREFIX + ChatModels.DEFAULT_EMBEDDING_MODEL_NAME
         embed_chunk_vecs = EMBEDDING_SESSION.embed_data(chunks)
 
-        print(type(embed_chunk_vecs))
-
         return QDRANT_SESSION.upsert(
             collection_name=collection_name,
-            points=[PointStruct(id=str(uuid.uuid1()), vector=chunk_vec, payload=dict(metadata, original_data=chunks[idx])) for idx, chunk_vec in enumerate(embed_chunk_vecs)],
-            wait=wait_for_completion
+            points=[
+                PointStruct(id=str(uuid.uuid1()), vector=chunk_vec, payload=dict(metadata, original_data=chunks[idx]))
+                for idx, chunk_vec in enumerate(embed_chunk_vecs)
+            ],
+            wait=wait_for_completion,
         )
 
 

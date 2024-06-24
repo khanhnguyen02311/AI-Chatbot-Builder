@@ -4,9 +4,11 @@ from dotenv import load_dotenv
 from .arguments import APP_STAGE
 
 if environ.get("POSTGRES_HOST") is None:  # local environment needs to load .env file manually
-    exist_loaded_env = load_dotenv(dotenv_path=f'{os.path.dirname(__file__)}/../.env.{APP_STAGE}', verbose=True)
+    exist_loaded_env = load_dotenv(dotenv_path=f"{os.path.dirname(__file__)}/../.env.{APP_STAGE}", verbose=True)
     if not exist_loaded_env:
-        raise FileNotFoundError(f"Cannot find .env.{APP_STAGE} file. If you are running in local environment, please create one using the .env.example file as reference.")
+        raise FileNotFoundError(
+            f"Cannot find .env.{APP_STAGE} file. If you are running in local environment, please create one using the .env.example file as reference."
+        )
 
 if not os.path.exists(f"{os.path.dirname(__file__)}/../etc/userdata"):
     os.makedirs(f"{os.path.dirname(__file__)}/../etc/userdata")
@@ -20,7 +22,8 @@ class General:
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/doc",
         "application/ms-doc",
-        "application/msword"]
+        "application/msword",
+    ]
 
 
 class Security:
@@ -74,6 +77,7 @@ class ChatModels:
         # "vinai@phobert-base": 768,
         # "vinai@phobert-base-v2": 768
     }
+    ALLOWED_LLM_MODEL_NAMES = ["gpt-4-turbo", "gpt-3.5-turbo-0125", "gpt-3.5-turbo-1106", "gpt-3.5-turbo"]
 
 
 class Chat:

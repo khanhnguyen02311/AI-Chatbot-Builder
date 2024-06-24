@@ -41,4 +41,10 @@ class BotPOST(BaseORMModel):
 
 
 class BotPUT(BotPOST):
+    # name: str | None = Field(max_length=64, default=None)
+    # description: str | None = Field(min_length=16, default=None)
+    # is_public: bool | None = None
+    # conf_model_temperature: float | None = Field(ge=0.0, le=1.0, default=None)
+    # conf_model_name: str | None = Field(max_length=64, default=None)
+    # conf_instruction: str | None = None
     pass

@@ -5,11 +5,24 @@ from langchain_community.utilities.openweathermap import OpenWeatherMapAPIWrappe
 weather_search_util = OpenWeatherMapAPIWrapper(openweathermap_api_key=ChatModels.OPENWEATHERMAP_API_KEY)
 
 
+def weather_search_result_util(location: str):
+    """Get current weather information of specific location. The input format is 'City, Country'."""
+    try:
+        return weather_search_util.get_current_weather(location)
+    except Exception as e:
+        return (
+            "Error happened when using tool: "
+            + str(e)
+            + '. You should check your input, it must be a valid location format ("City, Country").'
+        )
+
+
 def get_search_weather_tool():
     return Tool(
         name="search_weather",
         description="Get current weather information of specific location. The input format is 'City, Country'.",
-        func=weather_search_util.run)
+        func=weather_search_util.run,
+    )
 
 
 if __name__ == "__main__":

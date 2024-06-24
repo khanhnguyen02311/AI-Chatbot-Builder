@@ -1,14 +1,15 @@
 import os
 from datetime import datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, BackgroundTasks
 from fastapi.responses import FileResponse
 from configurations.envs import General
 from components.data import POSTGRES_SESSION_FACTORY
-from components.data.models.postgres import Account
+from components.data.models.postgres import Account, BotContext
 from components.data.schemas import bot as BotSchemas
 from components.data.schemas import bot_context as BotContextSchemas
 from components.services.account import AccountService
 from components.services.bot import BotService
+from agent_system.data.loader import DataLoader
 
 router = APIRouter(prefix="/bots")
 
@@ -73,12 +74,16 @@ def get_bot_contexts(bot_id: int, account: Account = Depends(AccountService.vali
 @router.post("/{bot_id}/contexts")
 async def add_bot_context(bot_id: int, file: UploadFile, account: Account = Depends(AccountService.validate_token)):
     if file.content_type not in General.BOT_CONTEXT_ALLOWED_MIME_TYPES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file type, only txt/pdf/doc/docx files allowed")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid file type, only txt/pdf/doc/docx files allowed"
+        )
     file.filename = f"{bot_id}_{int(datetime.now(timezone.utc).timestamp())}_{file.filename}"
 
     with POSTGRES_SESSION_FACTORY() as session:
         bot_service = BotService(session=session)
-        bot_context = bot_service.create_new_bot_context(BotContextSchemas.BotContextPOST(filename=file.filename, id_bot=bot_id), account)
+        bot_context = bot_service.create_new_bot_context(
+            BotContextSchemas.BotContextPOST(filename=file.filename, id_bot=bot_id), account
+        )
         with open(f"{os.path.join(General.BOT_CONTEXT_FILE_LOCATION, file.filename)}", "wb+") as f:
             try:
                 f.write(file.file.read())
@@ -104,7 +109,12 @@ def get_bot_context_file(bot_id: int, context_id: int, account: Account = Depend
 
 
 @router.put("/{bot_id}/contexts/{context_id}")
-def update_bot_context_data(bot_context_data: BotContextSchemas.BotContextPUT, bot_id: int, context_id: int, account: Account = Depends(AccountService.validate_token)):
+def update_bot_context_data(
+    bot_context_data: BotContextSchemas.BotContextPUT,
+    bot_id: int,
+    context_id: int,
+    account: Account = Depends(AccountService.validate_token),
+):
     with POSTGRES_SESSION_FACTORY() as session:
         bot_service = BotService(session=session)
         updated_bot_context = bot_service.update_bot_context(bot_id, context_id, bot_context_data, account)
@@ -121,3 +131,19 @@ async def delete_bot_context(bot_id: int, context_id: int, account: Account = De
         session.commit()
     return {"message": "Bot context deleted"}
     # TODO: additional step to remove from vector dbs
+
+
+@router.get("/{bot_id}/contexts/{context_id}/activate")
+async def activate_bot_context(
+    bot_id: int, context_id: int, bgtasks: BackgroundTasks, account: Account = Depends(AccountService.validate_token)
+):
+    with POSTGRES_SESSION_FACTORY() as session:
+        bot_service = BotService(session=session)
+        bot_context = bot_service.get_bot_context(bot_id, context_id, account)
+        if bot_context.metadata in [None, ""] or bot_context.embedding_model_used is None:
+            raise HTTPException(
+                status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Bot context's metadata and embedding model are required."
+            )
+        bgtasks.add_task(bot_service.activate_bot_context, bot_context=bot_context)
+
+    return "Bot context activation started in the background"
