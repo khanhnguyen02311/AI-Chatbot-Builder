@@ -31,20 +31,22 @@ class EmbeddingModelWrapper:
 
 def init_embedding_structure():
     collection_name = Qdrant.COLLECTION_PREFIX + ChatModels.DEFAULT_EMBEDDING_MODEL_NAME
+
     if not QDRANT_SESSION.collection_exists(collection_name=collection_name):
         print(f"Creating collection {collection_name}")
-        create_coll_succeed = QDRANT_SESSION.create_collection(
+        create_col1_success = QDRANT_SESSION.create_collection(
             collection_name=collection_name,
             vectors_config=VectorParams(
-                size=ChatModels.ALLOWED_EMBEDDING_MODELS[ChatModels.DEFAULT_EMBEDDING_MODEL_NAME], distance=Distance.COSINE
+                size=ChatModels.ALLOWED_EMBEDDING_MODELS[ChatModels.DEFAULT_EMBEDDING_MODEL_NAME],  # 1536
+                distance=Distance.COSINE,
             ),
         )
-        if not create_coll_succeed:
+        if not create_col1_success:
             raise Exception("Collection creation failed")
         QDRANT_SESSION.create_payload_index(
             collection_name=collection_name, field_name="id_bot", field_schema="integer", ordering=WriteOrdering.MEDIUM
         )
 
 
-QDRANT_SESSION = QdrantClient(f"{Qdrant.HOST}:{Qdrant.PORT}")
+QDRANT_SESSION = QdrantClient(f"http://{Qdrant.HOST}:{Qdrant.PORT}")
 EMBEDDING_SESSION = EmbeddingModelWrapper()
