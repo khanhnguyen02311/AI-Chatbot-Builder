@@ -6,6 +6,7 @@ resources:
   - volume-claim.yaml
   - redis.yaml
   - postgres.yaml
+  - qdrant.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml

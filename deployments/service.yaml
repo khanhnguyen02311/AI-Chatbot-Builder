@@ -33,7 +33,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: chatbot-builder-be-postgres
+    app: chatbot-builder-be-qdrant
   ports:
     - protocol: TCP
       port: 6333

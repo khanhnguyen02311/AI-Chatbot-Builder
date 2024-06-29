@@ -20,8 +20,6 @@ class DataRetriever:
         self, query: str, id_bot: int, id_bot_context: int | None = None, max_chunks: int = 3
     ) -> list[ScoredPoint]:
         """Get related chunks from bot context using a query"""
-        # if id_bot_context is not None:
-        #     raise Exception("Get data by specific bot context is not supported yet")
 
         collection_name = Qdrant.COLLECTION_PREFIX + ChatModels.DEFAULT_EMBEDDING_MODEL_NAME
         query_vector = EMBEDDING_SESSION.embed_data(query)

@@ -11,15 +11,15 @@ tags_metadata = [
     {"name": "Admin", "description": "Operations with application system & user roles"},
     {"name": "Auth", "description": "Operations with authentication methods & user validation"},
     {"name": "User Information", "description": "Operations with user information"},
-    {"name": "User Business", "description": "Operations with user businesses"},
-    {"name": "User Scenario", "description": "Operations with user scenarios"},
+    # {"name": "User Business", "description": "Operations with user businesses"},
+    # {"name": "User Scenario", "description": "Operations with user scenarios"},
     {"name": "User Bot", "description": "Operations with user bots"},
     {"name": "Model", "description": "Operations with AI models & agents"},
     {"name": "Public", "description": "Publicly available information / utilities"},
     {"name": "Webhook", "description": "Operations with webhook endpoints, used / called by other API services"},
     {"name": "Chat", "description": "Operations with chat sessions, messages & interactions"},
     {"name": "Websocket", "description": "Operations with websocket connection & authentication"},
-    {"name": "Others"}
+    {"name": "Others"},
 ]
 
 super_hub = APIRouter()
@@ -38,8 +38,8 @@ super_hub.include_router(token.router, prefix="/auth", tags=["Auth"])
 # super_hub.include_router(legacy.router, prefix="/model", tags=["Model"])
 
 super_hub.include_router(information.router, prefix="/user", tags=["User Information"])
-super_hub.include_router(businesses.router, prefix="/user", tags=["User Business"])
-super_hub.include_router(scenarios.router, prefix="/user", tags=["User Scenario"])
+# super_hub.include_router(businesses.router, prefix="/user", tags=["User Business"])
+# super_hub.include_router(scenarios.router, prefix="/user", tags=["User Scenario"])
 super_hub.include_router(user_bots.router, prefix="/user", tags=["User Bot"])
 
 super_hub.include_router(business_fields.router, prefix="/public", tags=["Public"])

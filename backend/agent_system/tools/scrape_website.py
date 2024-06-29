@@ -14,6 +14,8 @@ def website_scrape_util(url: str) -> str:
         )
     except Exception as e:
         return "Error happened when using tool: " + str(e) + ". You should check your input, it must be a valid URL."
+
+
     # Todo: custom website scraper, clean and extract to string
 
 

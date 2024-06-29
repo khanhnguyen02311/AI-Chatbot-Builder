@@ -122,9 +122,9 @@ class DataLoader:
 
 
 if __name__ == "__main__":
-    from agent_system.data import init_embedding_structure
+    # from agent_system.data import init_embedding_structure
 
-    init_embedding_structure()
+    # init_embedding_structure()
 
     data_loader = DataLoader()
     extracted_text = data_loader.parse_to_text("testfile.txt")
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     print(f"First chunk sample: \n'{test_chunks[0]}'")
     print("----")
 
-    test_bot_context = PostgresModels.BotContext(id=0, filename="testfile.txt", id_bot=0, time_created=datetime.now)
-    result = data_loader.load_chunks_to_qdrant(test_chunks, test_bot_context)
-    print("Chunks are loaded into Qdrant")
-    print("Result:", result.model_dump())
+    # test_bot_context = PostgresModels.BotContext(id=0, filename="testfile.txt", id_bot=0, time_created=datetime.now)
+    # result = data_loader.load_chunks_to_qdrant(test_chunks, test_bot_context)
+    # print("Chunks are loaded into Qdrant")
+    # print("Result:", result.model_dump())

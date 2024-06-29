@@ -26,4 +26,4 @@ def get_search_weather_tool():
 
 
 if __name__ == "__main__":
-    print(weather_search_util.run("Da Lat, Vietnam"))
+    print(weather_search_util.run("Da Lat, VN"))
