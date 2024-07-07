@@ -27,7 +27,7 @@ REDIS_SESSION = redis.Redis(host=Redis.HOST, port=Redis.PORT, db=Redis.DB, passw
 
 
 def init_data_structure():
-    PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
+    # PostgresModels.Base.metadata.drop_all(POSTGRES_ENGINE)
     PostgresModels.Base.metadata.create_all(POSTGRES_ENGINE)
 
     with POSTGRES_SESSION_FACTORY() as session:

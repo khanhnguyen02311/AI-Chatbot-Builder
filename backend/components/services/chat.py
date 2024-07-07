@@ -68,7 +68,7 @@ class ChatService:
     def get_session_messages(
         self,
         session_id: int,
-        chat_account: PostgresModels.ChatAccount,
+        chat_account: PostgresModels.ChatAccount | None,
         return_type: str = "model",
         with_validation: bool = True,
     ):

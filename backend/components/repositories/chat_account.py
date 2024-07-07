@@ -14,12 +14,18 @@ class ChatAccountRepository(BaseRepository, ABC):
         chat_account = self.session.scalar(query)
         return chat_account
 
-    def get_by_account_type(self, linked_identifier: int, account_type: str):
+    def get_by_account_type(self, linked_identifier: int | str, account_type: str):
         if account_type == "internal":
-            query = select(PostgresModels.ChatAccount).filter(PostgresModels.ChatAccount.id_internal_account == linked_identifier)
+            query = select(PostgresModels.ChatAccount).filter(
+                PostgresModels.ChatAccount.id_internal_account == linked_identifier
+            )
         else:
-            query = select(PostgresModels.ChatAccount).filter(and_(PostgresModels.ChatAccount.id_external_account == linked_identifier,
-                                                                   PostgresModels.ChatAccount.account_type == account_type))
+            query = select(PostgresModels.ChatAccount).filter(
+                and_(
+                    PostgresModels.ChatAccount.id_external_account == linked_identifier,
+                    PostgresModels.ChatAccount.account_type == account_type,
+                )
+            )
         chat_account = self.session.scalar(query)
         return chat_account
 
