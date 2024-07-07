@@ -1,6 +1,7 @@
 import os
 from os import environ
 from dotenv import load_dotenv
+from passlib.context import CryptContext
 from .arguments import APP_STAGE
 
 if environ.get("POSTGRES_HOST") is None:  # local environment needs to load .env file manually
@@ -27,6 +28,10 @@ class General:
 
 
 class Security:
+    # problems with bcrypt library in passlib
+    # DEFAULT_PASSWORD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__default_rounds=11)
+    DEFAULT_PASSWORD_CONTEXT = CryptContext(schemes=["sha256_crypt"], deprecated="auto", sha256_crypt__default_rounds=400000)
+
     JWT_SECRET_KEY = environ.get("SECURITY_JWT_SECRET_KEY")
     JWT_ALGORITHM = "HS256"
     JWT_ACCESS_TOKEN_EXPIRE_MINUTES = int(environ.get("SECURITY_JWT_ACCESS_TOKEN_MINUTE"))

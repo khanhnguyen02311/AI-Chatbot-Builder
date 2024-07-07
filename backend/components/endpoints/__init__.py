@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from .auth import login, logout, signup, token
+from .admin import login as admin_login, action
+from .auth import login as user_login, logout, signup, token
 from .model import legacy
 from .user import information, businesses, scenarios, bots as user_bots
 from .public import business_fields, bot_models, bots as public_bots
@@ -30,7 +31,10 @@ def hello():
     return {"msg": "Hello World"}
 
 
-super_hub.include_router(login.router, prefix="/auth", tags=["Auth"])
+super_hub.include_router(admin_login.router, prefix="/admin", tags=["Admin"])
+super_hub.include_router(action.router, prefix="/admin", tags=["Admin"])
+
+super_hub.include_router(user_login.router, prefix="/auth", tags=["Auth"])
 super_hub.include_router(logout.router, prefix="/auth", tags=["Auth"])
 super_hub.include_router(signup.router, prefix="/auth", tags=["Auth"])
 super_hub.include_router(token.router, prefix="/auth", tags=["Auth"])

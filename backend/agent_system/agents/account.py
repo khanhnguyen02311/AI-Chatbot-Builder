@@ -4,8 +4,6 @@ from langchain.prompts import PromptTemplate
 from langchain.memory import ConversationBufferWindowMemory
 from langchain.agents import AgentExecutor, create_react_agent
 from langchain_core.messages.base import BaseMessage
-from langchain_core.messages.ai import AIMessage
-from langchain_core.messages.human import HumanMessage
 from configurations.arguments import APP_DEBUG
 from configurations.envs import ChatModels
 from components.data import POSTGRES_SESSION_FACTORY
@@ -17,7 +15,9 @@ from agent_system.tools import get_tools_by_names, get_retriever_tools_by_bot_co
 
 class AccountAgent(Agent, ABC):
     def __init__(self, bot_data: PostgresModels.Bot, message_history: list[BaseMessage] = None):
+        self.name = bot_data.name
         self.prompt = None
+        self.chat_prompt = None
         self.tools = []
         self.llm = None
         self.agent = None
@@ -37,7 +37,7 @@ class AccountAgent(Agent, ABC):
         self.load_conversation(message_history if message_history is not None else [])
         self.load_chain()
 
-    def load_prompt_template(self, prompt):
+    def load_prompt_template(self, prompt: str):
         template = (
             """You are Assistant, a large language model trained by OpenAI. """
             + prompt
@@ -78,10 +78,6 @@ New input: {input}
 
     def load_tools(self, tool_list: list):
         self.tools += get_tools_by_names(tool_list)
-
-    def load_external_data(self, data):
-        print("Load_external_data not implemented")
-        pass
 
     def load_conversation(self, history: list[BaseMessage]):
         # load messages from database, for later

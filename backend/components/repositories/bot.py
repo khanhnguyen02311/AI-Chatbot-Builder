@@ -29,7 +29,12 @@ class BotRepository(BaseRepository, ABC):
         self.session.flush()
 
     def update(self, identifier: int, new_data: BotSchemas.BotPUT):
-        update_query = update(PostgresModels.Bot).returning(PostgresModels.Bot).where(PostgresModels.Bot.id == identifier).values(**new_data.model_dump(exclude_none=True))
+        update_query = (
+            update(PostgresModels.Bot)
+            .returning(PostgresModels.Bot)
+            .where(PostgresModels.Bot.id == identifier)
+            .values(**new_data.model_dump(exclude_none=True, exclude_defaults=True))
+        )
         new_bot_data = self.session.scalar(update_query)
         self.session.flush()
         return new_bot_data

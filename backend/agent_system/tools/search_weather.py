@@ -6,7 +6,7 @@ weather_search_util = OpenWeatherMapAPIWrapper(openweathermap_api_key=ChatModels
 
 
 def weather_search_result_util(location: str):
-    """Get current weather information of specific location. The input format is 'City, Country'."""
+    """Get current weather information of specific location. The input format is 'City, Country'. Examples: 'Tỉnh Quảng Bình,VN', 'Da Lat,VN'"""
     try:
         return weather_search_util.get_current_weather(location)
     except Exception as e:
@@ -20,7 +20,7 @@ def weather_search_result_util(location: str):
 def get_search_weather_tool():
     return Tool(
         name="search_weather",
-        description="Get current weather information of specific location. The input format is 'City, Country'.",
+        description="Get current weather information of specific location. The input format is 'City, Country'. Examples: 'Tỉnh Quảng Bình,VN', 'Da Lat,VN'",
         func=weather_search_util.run,
     )
 
