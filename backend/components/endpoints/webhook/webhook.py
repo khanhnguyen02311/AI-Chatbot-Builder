@@ -1,3 +1,4 @@
+import json
 import requests
 from fastapi import APIRouter, Request, Response
 from configurations.envs import Chat
@@ -44,12 +45,15 @@ async def get_messenger(request: Request):
 
             resp = requests.post(
                 f"https://graph.facebook.com/v20.0/{page_id}/messages",
-                params={
-                    "recipient": {"id": facebook_id},
-                    "message": {"text": new_response_message.content},
-                    "messaging_type": "RESPONSE",
-                    "access_token": Chat.FACEBOOK_PAGE_ACCESS_TOKEN,
-                },
+                data=json.dumps(
+                    {
+                        "recipient": {"id": facebook_id},
+                        "message": {"text": new_response_message.content},
+                        "messaging_type": "RESPONSE",
+                        "access_token": Chat.FACEBOOK_PAGE_ACCESS_TOKEN,
+                    }
+                ),
+                headers={"Content-Type": "application/json"},
             )
 
             print("FB RESPONSE:")
