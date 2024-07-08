@@ -43,7 +43,7 @@ async def get_messenger(request: Request):
             print(new_response_message)
 
             resp = requests.post(
-                f"https://graph.facebook.com/v20.0/{page_id}/message",
+                f"https://graph.facebook.com/v20.0/{page_id}/messages",
                 params={
                     "recipient": {"id": facebook_id},
                     "message": {"text": new_response_message.content},
