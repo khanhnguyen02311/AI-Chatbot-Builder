@@ -41,14 +41,12 @@ class AccountFacebookService:
 
         bot = self.bot_repository.get(self.current_chat_session.id_bot)
         session_message_history = self.chat_service.get_session_messages(
-            self.current_chat_session, self.current_account, return_type="langchain", with_validation=False
+            self.current_chat_session.id, self.current_account, return_type="langchain", with_validation=False
         )
         agent_response = AccountAgent(bot_data=bot, message_history=session_message_history).generate_response(
             new_message_data.content
         )
-        new_message = self.chat_service.create_new_chat_message(
-            new_message_data, self.current_account, with_validation=False
-        )
+        _ = self.chat_service.create_new_chat_message(new_message_data, self.current_account, with_validation=False)
         new_response_message = self.chat_service.create_new_chat_message(
             ChatMessageSchemas.ChatMessagePOST(
                 content=agent_response, type="bot", id_chat_session=self.current_chat_session.id

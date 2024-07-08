@@ -27,6 +27,9 @@ async def get_messenger(request: Request):
 
         message_data = data["entry"][0]["messaging"][0]
 
+        print("NEW MESSAGE: ")
+        print(message_data)
+
         facebook_id = message_data["sender"]["id"]
         page_id = message_data["recipient"]["id"]
         message_content = message_data["message"]["text"]
@@ -36,7 +39,7 @@ async def get_messenger(request: Request):
             new_response_message = facebook_service.append_new_message(message_content)
             session.commit()
 
-            print("NEW MESSAGE:")
+            print("NEW MESSAGE RESPONSE:")
             print(new_response_message)
 
             resp = requests.post(
