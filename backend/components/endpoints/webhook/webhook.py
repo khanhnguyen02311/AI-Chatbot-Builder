@@ -1,3 +1,4 @@
+import requests
 from fastapi import APIRouter, Request, Response
 from configurations.envs import Chat
 from components.data import POSTGRES_SESSION_FACTORY
@@ -35,12 +36,35 @@ async def get_messenger(request: Request):
             new_response_message = facebook_service.append_new_message(message_content)
             session.commit()
 
+            print("NEW MESSAGE:")
             print(new_response_message)
+
+            resp = requests.post(
+                f"https://graph.facebook.com/v20.0/{page_id}/message",
+                params={
+                    "recipient": {"id": facebook_id},
+                    "message": {"text": new_response_message.content},
+                    "messaging_type": "RESPONSE",
+                    "access_token": Chat.FACEBOOK_PAGE_ACCESS_TOKEN,
+                },
+            )
+
+            print("FB RESPONSE:")
+            print(resp.status_code, resp.content)
 
         # send message to Facebook
 
     return '{"status": "ok"}'
 
+
+# To respond to the message a customer sent to your Page, send a POST request to /PAGE-ID/messages endpoint with the recipient parameter set to the customer's PSID, messaging_type parameter set to RESPONSE, and the message parameter set to your response. Note that this must be sent within 24 hours of your Page receiving the customer's message.
+
+
+# curl -i -X POST "https://graph.facebook.com/LATEST-API-VERSION/PAGE-ID/messages
+#     ?recipient={id:PSID}
+#     &message={text:'You did it!'}
+#     &messaging_type=RESPONSE
+#     &access_token=PAGE-ACCESS-TOKEN"
 
 # Received message structure:
 # {
