@@ -29,7 +29,7 @@ The system consists of the [backend](./backend/) and [frontend](./frontend/) mod
 ***For backend module:***
 
 - Create a new environment file based on [.env.example](./backend/.env.example), in the same place as the example file location.
-  - The env filename must be **.env.[anything]** (.env.dev / env.staging / env.hello / ...)
+  - The env filename must be **.env.[anyname]** (.env.dev / env.staging / env.hello / ...)
   - Create neccessary API keys for third party services **(HuggingFace, OpenAI, OpenWeather, Google Search API)** and add to the environment file.
   - Change secret keys, DB credentials, ... if wanted.
 - Create a new Python environment and install backend dependencies. You can use venv, Anaconda, Poetry, whatever you want. The easiest is to use the default venv library:
@@ -45,14 +45,14 @@ pip install -r requirements.txt
 - Run [docker-compose-dev.yml](./backend/docker-compose-dev.yml) file to run the backend databases, use the same environment filename in the *--env-file* options
 
 ```sh
-docker compose -p assistant-builder-dev -f docker-compose-dev.yml --env-file .env.[anything] up
+docker compose -p assistant-builder-dev -f docker-compose-dev.yml --env-file .env.[anyname] up
 ```
 
-- Start the application, the stage name must be the same name as the env file suffix for it to load the correct variables.
+- Run the backend module, the **stage name** must be the same as the env file suffix for it to load the correct variables.
 
 ```sh
 # inside backend folder, venv_backend activated
-python main.py --stage [anything] --debug True
+python main.py --stage [anyname] --debug True
 ```
 
 ***For frontend module:***
@@ -66,7 +66,7 @@ source .venv_frontend/bin/activate
 pip install -r requirements.txt
 ```
 
-- Run the frontend application
+- Run the frontend module
 
 ```sh
 # inside frontend/mvp_streamlit folder, venv_frontend activated
