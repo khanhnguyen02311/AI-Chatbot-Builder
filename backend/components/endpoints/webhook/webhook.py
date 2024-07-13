@@ -10,11 +10,8 @@ router = APIRouter()
 
 @router.get("")
 async def init_messenger(request: Request):
-    # FB sends the verify token as hub.verify_token
     fb_token = request.query_params.get("hub.verify_token")
-    # we verify if the token sent matches our verify token
-    if fb_token == Chat.FACEBOOK_VERIFY_TOKEN:
-        # respond with hub.challenge parameter from the request.
+    if fb_token == Chat.FACEBOOK_VERIFY_TOKEN:  # your verify token
         return Response(content=request.query_params["hub.challenge"])
     return "Failed to verify token"
 
@@ -23,13 +20,7 @@ async def init_messenger(request: Request):
 async def get_messenger(request: Request):
     data = await request.json()
     if data.get("object") == "page":
-        # handleMessage(sender_id, received_message)
-        # Further processing of the webhook data can be done here
-
         message_data = data["entry"][0]["messaging"][0]
-
-        print("NEW MESSAGE: ")
-        print(message_data)
 
         facebook_id = message_data["sender"]["id"]
         page_id = message_data["recipient"]["id"]
@@ -40,9 +31,6 @@ async def get_messenger(request: Request):
             new_response_message = facebook_service.append_new_message(message_content)
             session.commit()
 
-            print("NEW MESSAGE RESPONSE:")
-            print(new_response_message)
-
             resp = requests.post(
                 f"https://graph.facebook.com/v20.0/{page_id}/messages",
                 data=json.dumps(
@@ -50,16 +38,11 @@ async def get_messenger(request: Request):
                         "recipient": {"id": facebook_id},
                         "message": {"text": new_response_message.content},
                         "messaging_type": "RESPONSE",
-                        "access_token": Chat.FACEBOOK_PAGE_ACCESS_TOKEN,
+                        "access_token": Chat.FACEBOOK_PAGE_ACCESS_TOKEN,  # your page access token
                     }
                 ),
                 headers={"Content-Type": "application/json"},
             )
-
-            print("FB RESPONSE:")
-            print(resp.status_code, resp.content)
-
-        # send message to Facebook
 
     return '{"status": "ok"}'
 

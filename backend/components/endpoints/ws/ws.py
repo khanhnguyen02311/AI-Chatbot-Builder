@@ -16,11 +16,6 @@ def get_one_time_token(chat_account: PostgresModels.ChatAccount = Depends(Accoun
     return WEBSOCKET_SERVICE_SESSION.create_one_time_websocket_token(chat_account)
 
 
-# @router.get("")
-# def ws_endpoint_placeholder(token: str):
-#     return "Placeholder for Swagger. Using websocket connection in this endpoint instead, pass one-time token in the query"
-
-
 @router.websocket("")
 async def ws_endpoint(ws: CustomWebsocket, token: str):
     chat_account = await WEBSOCKET_SERVICE_SESSION.connect(ws, token)

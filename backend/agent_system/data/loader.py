@@ -109,6 +109,8 @@ class DataLoader:
             "embedding_model": ChatModels.DEFAULT_EMBEDDING_MODEL_NAME,
         }
         collection_name = Qdrant.COLLECTION_PREFIX + ChatModels.DEFAULT_EMBEDDING_MODEL_NAME
+
+        # USE EMBEDDING MODEL TO CONVERT DATA TO VECTORS
         embed_chunk_vecs = EMBEDDING_SESSION.embed_data(chunks)
 
         return QDRANT_SESSION.upsert(

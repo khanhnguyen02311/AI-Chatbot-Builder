@@ -151,8 +151,8 @@ class Bot(Base):
     conf_model_name: Mapped[str64]
     conf_instruction: Mapped[str]
     conf_external_data: Mapped[Optional[str]]
-    graph_main_bot: Mapped[bool] = Column(BOOLEAN, default=True)
-    graph_connected_bots: Mapped[int_array]
+    # graph_main_bot: Mapped[bool] = Column(BOOLEAN, default=True)
+    # graph_connected_bots: Mapped[int_array]
     time_created: Mapped[timestamp]
 
     id_account: Mapped[int] = Column(INTEGER, ForeignKey("account.id"))
