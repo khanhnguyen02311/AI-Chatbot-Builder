@@ -5,14 +5,15 @@ from pages.controllers import AuthController
 
 def authenticated_menu():
     # Show a navigation menu for authenticated users
-    st.sidebar.page_link("Home.py", label="Home")
+    st.sidebar.page_link("Home.py", label="Trang chủ")
     # st.sidebar.page_link("pages/BotViewer.py", label="Bot Viewer")
     # st.sidebar.page_link("pages/BotEditor.py", label="Bot Editor")
     # st.sidebar.page_link("pages/BotTravelViewer.py", label="Chat với Bot (version cũ)")
     st.sidebar.page_link("pages/ChatViewer.py", label="Chat với Bot")
     st.sidebar.page_link("pages/BotBuilder.py", label="Thiết kế Bot")
+    st.container(height=50, border=False)
     st.sidebar.markdown(f"### Logged in as {st.session_state['logged_in_as']}")
-    st.sidebar.button("Logout", on_click=AuthController.logout)
+    st.sidebar.button("Đăng xuất", on_click=AuthController.logout)
 
     # if st.session_state.role in ["admin", "super-admin"]:
     #     st.sidebar.page_link("pages/admin.py", label="Manage users")
@@ -25,11 +26,12 @@ def authenticated_menu():
 
 def unauthenticated_menu():
     # Show a navigation menu for unauthenticated users
-    st.sidebar.page_link("Home.py", label="Home")
+    st.sidebar.page_link("Home.py", label="Trang chủ")
     # st.sidebar.page_link("pages/Login.py", label="Login")
     # st.sidebar.page_link("pages/Signup.py", label="Signup")
-    login_button = st.sidebar.button("Login", use_container_width=True)
-    signup_button = st.sidebar.button("Signup", use_container_width=True, type="primary")
+    st.container(height=50, border=False)
+    login_button = st.sidebar.button("Đăng nhập", use_container_width=True)
+    signup_button = st.sidebar.button("Đăng ký", use_container_width=True, type="primary")
     if login_button:
         st.switch_page("pages/Login.py")
     if signup_button:
@@ -56,8 +58,8 @@ def menu():
 def menu_with_redirect():
     # Redirect users to the main page if not logged in, otherwise continue to render the navigation menu
     if "logged_in_as" not in st.session_state or st.session_state["logged_in_as"] == "":
-        st.warning("You are not logged in! Please log in to use this feature.")
-        back_button = st.button("Back to Homepage")
+        st.warning("Vui lòng đăng nhập để sử dụng hệ thống.")
+        back_button = st.button("Về Trang chủ")
         if back_button:
             st.switch_page("Home.py")
         st.stop()

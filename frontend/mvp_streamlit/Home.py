@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit_extras.stylable_container import stylable_container
 from Menu import menu
 
 # -----------------------------------------------------------------------------
@@ -16,7 +17,11 @@ st.set_page_config(page_title="Trang chủ", layout="wide")
 
 st.session_state.action_result_data = None
 
-if "logged_in_as" not in st.session_state or "access_token" not in st.session_state or "refresh_token" not in st.session_state:
+if (
+    "logged_in_as" not in st.session_state
+    or "access_token" not in st.session_state
+    or "refresh_token" not in st.session_state
+):
     st.session_state["logged_in_as"] = ""
     st.session_state["access_token"] = ""
     st.session_state["refresh_token"] = ""
@@ -26,6 +31,34 @@ menu()
 # st.title("Chatbot Engine! 👋")
 # st.subheader("A place to build, test, and deploy chatbots for your specific needs.")
 
-st.title("BotTouristant xin chào! 👋 ")
-st.divider()
-st.subheader("BotTouristant là một nền tảng hỗ trợ tham khảo các dịch vụ du lịch, cũng như giải đáp thắc mắc của khách du lịch sử dụng chatbot.")
+col1, col2 = st.columns(2)
+
+with col1:
+    st.title("BotTouristant xin chào! 👋", anchor=False)
+    st.subheader("""Chatbot du lịch cho người Việt, cho du lịch Việt""")
+    st.container(height=100, border=False)
+    st.markdown("""## BotTouristant giúp khách du lịch: """)
+    st.markdown(
+        """
+- #### Tra cứu thông tin địa điểm du lịch, tham quan tại địa phương
+- #### Thiết kế lịch trình du lịch cho hội nhóm
+- #### Trả lời các câu hỏi thường gặp""",
+    )
+    st.container(height=80, border=False)
+    with stylable_container(
+        key="big_button",
+        css_styles="""
+        button {
+            width: 200px; 
+            height: 50px; 
+            border-radius: 25px; 
+            border: 7px solid;
+            box-sizing: 5%;
+            font-size:50px;
+        }
+        """,
+    ):
+        st.button("TRẢI NGHIỆM NGAY", type="primary")
+
+with col2:
+    st.image("static/homepage-1.png")

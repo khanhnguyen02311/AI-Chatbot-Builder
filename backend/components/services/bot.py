@@ -6,8 +6,10 @@ from components.data import POSTGRES_SESSION_FACTORY, REDIS_SESSION
 from components.data.models import postgres as PostgresModels
 from components.data.schemas import bot as BotSchemas
 from components.data.schemas import bot_context as BotContextSchemas
+from components.data.schemas import bot_team as BotTeamSchemas
 from components.repositories.bot import BotRepository
 from components.repositories.bot_context import BotContextRepository
+from components.repositories.bot_team import BotTeamRepository
 from agent_system.data.loader import DataLoader
 from agent_system.data.retriever import DataRetriever
 from agent_system.agents.account import AccountAgent
@@ -18,8 +20,10 @@ class BotService:
 
     def __init__(self, session):
         self.session = session
+        self.redis_session = REDIS_SESSION
         self.bot_repository = BotRepository(session=session)
         self.bot_context_repository = BotContextRepository(session=session)
+        self.bot_team_repository = BotTeamRepository(session=session)
 
     def validate_account_bot(self, bot_id: int, account_id: int):
         """Validate if a bot belongs to an account"""
@@ -146,3 +150,55 @@ class BotService:
         result = data_loader.load_chunks_to_qdrant(parsed_chunks, bot_context)
         print(f"Parsing for BotContext {bot_context.id} is done. Result: {str(result)}")
         # send result notification
+
+    def validate_account_bot_team(self, bot_team_id: int, account_id: int):
+        bot = self.bot_team_repository.get(bot_team_id)
+        if bot is None or bot.id_account != account_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot Team not found")
+        return bot
+
+    def get_bot_team(self, bot_team_id: int, with_members: bool = False):
+        bot_team = self.bot_team_repository.get(bot_team_id)
+        if bot_team is None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bot Team not found")
+        if not with_members:
+            return bot_team
+
+        members = []
+        for bot_id in bot_team.team_members:
+            bot = self.bot_repository.get(bot_id)
+            if bot is not None:
+                members.append(bot)
+        return bot_team, members
+
+    def get_account_bot_teams(self, account: PostgresModels.Account):
+        return self.bot_team_repository.get_all_by_account(account.id)
+
+    def create_bot_team(self, bot_team_data: BotTeamSchemas.BotTeamPOST, account: PostgresModels.Account):
+        for bot_id in bot_team_data.team_members:
+            self.validate_account_bot(bot_id, account.id)
+        new_bot_team = PostgresModels.BotTeam(**bot_team_data.model_dump(), id_account=account.id)
+        self.bot_team_repository.create(new_bot_team)
+        return new_bot_team
+
+    def update_bot_team(self, bot_team_id: int, update_data: BotTeamSchemas.BotTeamPUT, account: PostgresModels.Account):
+        self.validate_account_bot_team(bot_team_id, account.id)
+        for bot_id in update_data.team_members:
+            self.validate_account_bot(bot_id, account.id)
+        updated_bot_team = self.bot_team_repository.update(bot_team_id, update_data)
+        return updated_bot_team
+
+    def delete_bot_team(self, bot_team_id: int, account: PostgresModels.Account):
+        self.validate_account_bot_team(bot_team_id, account.id)
+        deleted_bot_team = self.bot_team_repository.delete(bot_team_id)
+        return deleted_bot_team
+
+    def get_default_facebook_bot_team(self):
+        bot_team_id = self.redis_session.get("DEFAULT_FACEBOOK_BOT_TEAM")
+        if bot_team_id is None:
+            return None
+        bot_team = self.bot_team_repository.get(bot_team_id)
+        return bot_team
+
+    def set_default_facebook_bot_team(self, bot_team_id: int):
+        self.redis_session.set("DEFAULT_FACEBOOK_BOT_TEAM", bot_team_id)

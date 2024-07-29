@@ -61,7 +61,9 @@ Previous conversation history:
 
 New input: {input}
 {agent_scratchpad}"""
-        self.prompt = PromptTemplate(input_variables=['agent_scratchpad', 'conversation_history', 'input', 'tool_names', 'tools'], template=template)
+        self.prompt = PromptTemplate(
+            input_variables=["agent_scratchpad", "conversation_history", "input", "tool_names", "tools"], template=template
+        )
 
     def load_tools(self, tool_list: list):
         self.tools = get_tools_by_names(tool_list)
@@ -72,15 +74,23 @@ New input: {input}
 
     def load_conversation(self):
         # load messages from database, for later
-        self.memory = ConversationBufferWindowMemory(memory_key="conversation_history", input_key="input", ai_prefix="Assistant", k=4)
-        self.agent_chain = AgentExecutor.from_agent_and_tools(agent=self.agent, tools=self.tools, memory=self.memory, verbose=APP_DEBUG, max_execution_time=8, max_iterations=10)
+        self.memory = ConversationBufferWindowMemory(
+            memory_key="conversation_history", input_key="input", ai_prefix="Assistant", k=4
+        )
+        self.agent_chain = AgentExecutor.from_agent_and_tools(
+            agent=self.agent,
+            tools=self.tools,
+            memory=self.memory,
+            verbose=APP_DEBUG,
+            max_execution_time=8,
+            max_iterations=10,
+        )
 
     def generate_response(self, user_input: str):
         response = self.agent_chain.invoke({"input": user_input}, return_only_outputs=True)
-        return response['output']
+        return response["output"]
 
     async def generate_response_with_callback(self, user_input: str):
         with get_openai_callback() as cb:
             response = await self.agent_chain.ainvoke({"input": user_input}, return_only_outputs=True)
-            print(cb)
-            return response['output']
+            return response["output"]

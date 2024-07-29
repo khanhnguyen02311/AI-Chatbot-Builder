@@ -5,9 +5,9 @@ from Menu import menu
 menu()
 
 with st.form("login_form"):
-    st.markdown("#### Enter your credentials")
-    st.text_input("Username or email", key="var_username_or_email")
-    st.text_input("Password", type="password", key="var_password")
-    submit = st.form_submit_button("Login")
+    st.markdown("#### Đăng nhập vào BotTouristant")
+    st.text_input("Tên tài khoản hoặc Email", key="var_username_or_email")
+    st.text_input("Mật khẩu", type="password", key="var_password")
+    submit = st.form_submit_button("Đăng nhập")
     if submit:
         AuthController.login()

@@ -29,6 +29,7 @@ class ChatAccountPOST(BaseORMModel):
     def at_least_one_account(self):
         if not self.id_internal_account and not self.id_external_account:
             raise ValueError("At least one of id_internal_account or id_external_account must be provided")
+        return self
 
     def model_dump_internal(self):
         return self.model_dump(exclude={"id_external_account", "name"})

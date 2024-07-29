@@ -6,6 +6,7 @@ from . import BaseController
 # var_sessions
 # var_selected_session
 
+
 @BaseController.with_try_catch
 def load_bot_data():
     # load just public bots for now
@@ -39,12 +40,21 @@ def load_session(session_id: int):
         st.error("Failed to load chat history.")
         st.session_state.var_selected_session = None
         return
-    st.session_state.var_selected_session = [session_resp.json()["chat_session"], session_resp.json()["bot"], message_resp.json()]
+    json_response = session_resp.json()
+    bot_data = json_response["bot"] if json_response["bot"] is not None else json_response["bot_team"]
+
+    st.session_state.var_selected_session = [
+        session_resp.json()["chat_session"],
+        bot_data,
+        message_resp.json(),
+    ]
 
 
 @BaseController.with_try_catch
 def create_new_session(selected_bot_index: int):
-    resp = BaseController.create_request("POST", "/chat/sessions", {"id_bot": st.session_state.var_public_bots[selected_bot_index]["id"]})
+    resp = BaseController.create_request(
+        "POST", "/chat/sessions", {"id_bot": st.session_state.var_public_bots[selected_bot_index]["id"]}
+    )
     if resp.status_code == 200:
         st.session_state.var_sessions.insert(0, resp.json())
         load_session(resp.json()["id"])
@@ -58,9 +68,11 @@ def send_message():
     if not st.session_state.var_selected_session or len(st.session_state.var_selected_session) < 3:
         st.warning("No session selected. Create a new session or choose an existing one.")
         return
-    resp = BaseController.create_request("POST", f"/chat/sessions/{st.session_state.var_selected_session[0]['id']}/messages", {
-        "type": "user-text",
-        "content": st.session_state.var_message_input})
+    resp = BaseController.create_request(
+        "POST",
+        f"/chat/sessions/{st.session_state.var_selected_session[0]['id']}/messages",
+        {"type": "user-text", "content": st.session_state.var_message_input},
+    )
     if resp.status_code == 200:
         st.session_state.var_selected_session[2].append(resp.json()["message"])
         st.session_state.var_selected_session[2].append(resp.json()["response"])

@@ -12,8 +12,8 @@ class BotFULL(BaseORMModel):
     conf_model_name: str
     conf_instruction: str
     conf_external_data: str | None
-    graph_main_bot: bool
-    graph_connected_bots: list[int]
+    # graph_main_bot: bool
+    # graph_connected_bots: list[int]
     time_created: datetime
     id_account: int
 
@@ -27,8 +27,8 @@ class BotGET(BaseORMModel):
     name: str
     description: str
     id_account: int
-    graph_main_bot: bool
-    graph_connected_bots: list[int]
+    # graph_main_bot: bool
+    # graph_connected_bots: list[int]
 
 
 class ListBotGET(BaseListModel):
@@ -42,8 +42,8 @@ class BotPOST(BaseORMModel):
     conf_model_temperature: float = Field(ge=0.0, le=1.0)
     conf_model_name: str = Field(max_length=64)
     conf_instruction: str
-    graph_main_bot: bool = True
-    graph_connected_bots: list[int] = []
+    # graph_main_bot: bool = True
+    # graph_connected_bots: list[int] = []
 
 
 class BotPUT(BotPOST):

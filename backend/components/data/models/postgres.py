@@ -151,8 +151,6 @@ class Bot(Base):
     conf_model_name: Mapped[str64]
     conf_instruction: Mapped[str]
     conf_external_data: Mapped[Optional[str]]
-    # graph_main_bot: Mapped[bool] = Column(BOOLEAN, default=True)
-    # graph_connected_bots: Mapped[int_array]
     time_created: Mapped[timestamp]
 
     id_account: Mapped[int] = Column(INTEGER, ForeignKey("account.id"))
@@ -161,15 +159,6 @@ class Bot(Base):
     rel_bot_context: Mapped[List["BotContext"]] = relationship(
         "BotContext", back_populates="rel_bot", uselist=True, cascade="all, delete-orphan"
     )
-
-
-# class BotModel(Base):
-#     """Store bot model information \n
-#    Primary key: id \n"""
-#
-#     __tablename__ = 'bot_model'
-#     id: Mapped[int_PK]
-#     name: Mapped[str64]
 
 
 class BotContext(Base):
@@ -186,6 +175,19 @@ class BotContext(Base):
 
     id_bot: Mapped[int] = Column(INTEGER, ForeignKey("bot.id"))
     rel_bot: Mapped[Bot] = relationship("Bot")
+
+
+class BotTeam(Base):
+    __tablename__ = "bot_team"
+    id: Mapped[int_PK]
+    name: Mapped[str64]
+    description: Mapped[Optional[str]]
+    using_supervisor: Mapped[bool]
+    using_general_bot: Mapped[bool]
+    team_members: Mapped[int_array]
+    time_created: Mapped[timestamp]
+
+    id_account: Mapped[int] = Column(INTEGER, ForeignKey("account.id"))
 
 
 class Scenario(Base):
@@ -234,7 +236,8 @@ class ChatSession(Base):
     id_chat_account: Mapped[int] = Column(INTEGER, ForeignKey("chat_account.id"))
     rel_chat_account: Mapped[ChatAccount] = relationship("ChatAccount")
 
-    id_bot: Mapped[int] = Column(INTEGER, ForeignKey("bot.id"))
+    id_bot: Mapped[Optional[int]] = Column(INTEGER, ForeignKey("bot.id"))
+    id_bot_team: Mapped[Optional[int]] = Column(INTEGER, ForeignKey("bot_team.id"))
     # rel_bot: Mapped[Bot] = relationship('Bot', back_populates='rel_chats')
 
     rel_chat_message: Mapped[List["ChatMessage"]] = relationship(

@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from .admin import login as admin_login, action
 from .auth import login as user_login, logout, signup, token
 from .model import legacy
-from .user import information, businesses, scenarios, bots as user_bots
+from .user import bot_teams, information, businesses, scenarios, bots as user_bots
 from .public import business_fields, bot_models, bots as public_bots
 from .webhook import webhook
 from .chat import sessions
@@ -45,6 +45,7 @@ super_hub.include_router(information.router, prefix="/user", tags=["User Informa
 # super_hub.include_router(businesses.router, prefix="/user", tags=["User Business"])
 # super_hub.include_router(scenarios.router, prefix="/user", tags=["User Scenario"])
 super_hub.include_router(user_bots.router, prefix="/user", tags=["User Bot"])
+super_hub.include_router(bot_teams.router, prefix="/user", tags=["User Bot"])
 
 super_hub.include_router(business_fields.router, prefix="/public", tags=["Public"])
 super_hub.include_router(bot_models.router, prefix="/public", tags=["Public"])

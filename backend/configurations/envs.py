@@ -82,7 +82,14 @@ class ChatModels:
         # "vinai@phobert-base": 768,
         # "vinai@phobert-base-v2": 768
     }
-    ALLOWED_LLM_MODEL_NAMES = ["gpt-4-turbo", "gpt-3.5-turbo-0125", "gpt-3.5-turbo-1106", "gpt-3.5-turbo"]
+    ALLOWED_LLM_MODEL_NAMES = [
+        "gpt-4o",
+        "gpt-4o-mini",
+        "gpt-4-turbo",
+        "gpt-3.5-turbo-0125",
+        "gpt-3.5-turbo-1106",
+        "gpt-3.5-turbo",
+    ]
 
 
 class Chat:

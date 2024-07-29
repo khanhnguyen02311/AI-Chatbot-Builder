@@ -49,10 +49,11 @@ class ChatService:
 
         if session_data.name is None:
             session_data.name = "Session " + datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        # check public / owned bot
-        bot = BotRepository(self.session).get(session_data.id_bot)
-        if bot is None or not (bot.is_public or bot.id_account == chat_account.id_internal_account):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
+        if session_data.id_bot is not None:
+            # check public / owned bot
+            bot = BotRepository(self.session).get(session_data.id_bot)
+            if bot is None or not (bot.is_public or bot.id_account == chat_account.id_internal_account):
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bot not found")
         chat_session = PostgresModels.ChatSession(
             **session_data.model_dump(), id_chat_account=chat_account.id, human_reply=False
         )
