@@ -16,6 +16,7 @@ def ui_new_context_dialog():
             filedata = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type, {})}
             BotBuilderController.upload_bot_context(filedata, description)
 
+
 def update_bot_builder_data():
     st.session_state.var_bot_builder_id = st.session_state.ui_bot_builder_id
     st.session_state.var_bot_builder_name = st.session_state.ui_bot_builder_name
@@ -24,8 +25,10 @@ def update_bot_builder_data():
     st.session_state.var_bot_builder_conf_instruction = st.session_state.ui_bot_builder_conf_instruction
     st.session_state.var_bot_builder_conf_model_temperature = st.session_state.ui_bot_builder_conf_model_temperature
 
+
 def update_selected_bot_index():
     st.session_state.var_selected_personal_bot_index = st.session_state.ui_selected_personal_bot_index
+
 
 st.set_page_config(page_title="Thiết kế Bot", layout="wide")
 st.title("Thiết kế Bot")
@@ -44,12 +47,14 @@ if "var_selected_personal_bot_index" not in st.session_state:
 if "ui_btn_new_bot" in st.session_state and st.session_state.ui_btn_new_bot:
     st.session_state.var_selected_personal_bot_index = None
 
-st.sidebar.selectbox("Chọn Bot có sẵn của bạn", 
+st.sidebar.selectbox(
+    "Chọn Bot có sẵn của bạn",
     range(len(st.session_state.var_personal_bots)),
     key="ui_selected_personal_bot_index",
     index=st.session_state.var_selected_personal_bot_index,
     on_change=update_selected_bot_index,
-    format_func=lambda x: st.session_state.var_personal_bots[x]["name"])
+    format_func=lambda x: st.session_state.var_personal_bots[x]["name"],
+)
 
 st.sidebar.divider()
 st.sidebar.text("Hoặc")
@@ -87,8 +92,20 @@ with st.form("ui_bot_builder_form"):
     st.text_area("Thông tin tổng quan", key="ui_bot_builder_description", value=st.session_state.var_bot_builder_description)
     # st.text_input("Model AI sử dụng")
     st.checkbox("Chế độ công khai", key="ui_bot_builder_is_public", value=st.session_state.var_bot_builder_is_public)
-    st.text_area("Chỉ dẫn hành động (prompt)", key="ui_bot_builder_conf_instruction", value=st.session_state.var_bot_builder_conf_instruction, height=200)
-    st.slider("Độ sáng tạo (temperature)", key="ui_bot_builder_conf_model_temperature", value=st.session_state.var_bot_builder_conf_model_temperature, min_value=0.0, max_value=1.0, step=0.05)
+    st.text_area(
+        "Chỉ dẫn hành động (prompt)",
+        key="ui_bot_builder_conf_instruction",
+        value=st.session_state.var_bot_builder_conf_instruction,
+        height=200,
+    )
+    st.slider(
+        "Độ sáng tạo (temperature)",
+        key="ui_bot_builder_conf_model_temperature",
+        value=st.session_state.var_bot_builder_conf_model_temperature,
+        min_value=0.0,
+        max_value=1.0,
+        step=0.05,
+    )
 
     col1, col2, col3 = st.columns([1.5, 1.5, 8])
     with col1:
@@ -97,7 +114,7 @@ with st.form("ui_bot_builder_form"):
         submit_delete = None
         if st.session_state.ui_bot_builder_form_option == "update":
             submit_delete = st.form_submit_button("Xóa Bot", type="secondary", use_container_width=True)
-    
+
     if submit:
         update_bot_builder_data()
         if st.session_state.ui_bot_builder_form_option == "create":
@@ -118,7 +135,7 @@ for context_item in st.session_state.var_personal_bot_contexts:
     with st.form("ui_bot_context_form_" + str(context_item["id"])):
         col1, col2 = st.columns([7, 3], vertical_alignment="bottom", gap="medium")
         with col1:
-            st.markdown(f"#### {context_item["filename"]}")
+            st.markdown(f"#### {context_item['filename']}")
             new_description = st.text_input("Tổng quan bộ dữ liệu", value=context_item["description"])
         with col2:
             col3, col4, col5 = st.columns([2, 1, 1])
@@ -128,7 +145,7 @@ for context_item in st.session_state.var_personal_bot_contexts:
                 submit_delete_context = st.form_submit_button("Xoá", type="secondary", use_container_width=True)
             with col5:
                 submit_download_context = st.form_submit_button("Tải về", type="secondary", use_container_width=True)
-        
+
         if submit_update_context:
             BotBuilderController.update_bot_context(context_item["id"], new_description)
         if submit_delete_context:
