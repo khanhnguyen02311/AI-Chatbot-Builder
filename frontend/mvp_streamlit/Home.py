@@ -58,7 +58,9 @@ with col1:
         }
         """,
     ):
-        st.button("TRẢI NGHIỆM NGAY", type="primary")
+        start_btn = st.button("TRẢI NGHIỆM NGAY", type="primary")
+        if start_btn:
+            st.switch_page("pages/Login.py")
 
 with col2:
     st.image("static/homepage-1.png")
